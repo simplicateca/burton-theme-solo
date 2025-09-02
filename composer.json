@@ -12,7 +12,7 @@
         "email" : "info@simplicate.ca"
     },
     "prefer-stable": true,
-    "minimum-stability": "beta",
+    "minimum-stability": "dev",
     "require": {
         "craftcms/cms": "^5.0.0",
         "simplicateca/burton-protosite": "dev-develop",
