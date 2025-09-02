@@ -1,0 +1,222 @@
+{## Block Layout - Meta Field Config
+{----------------------------------------------------------------------------#}
+{%- set type  = element.type.handle  ?? null -%}
+{%- set field = element.field.handle ?? null -%}
+
+
+{## Common Meta Fields
+{----------------------------------------------------------------------------#}
+{%- set common = {
+    zone1Left: {
+        label: "Content Column Widths",
+        help: "Width and positioning of content rows",
+        select: {
+            "cols-50|50": "50% / 50%",
+            "cols-33|66": "33% / 66%",
+            "cols-66|33": "66% / 33%",
+        }
+    },
+
+    zone1Right: {
+        label: "Content Column Widths",
+        help: "Width and positioning of content rows",
+        select: {
+            "colsrev-50|50": "50% / 50%",
+            "colsrev-33|66": "33% / 66%",
+            "colsrev-66|33": "66% / 33%",
+        }
+    },
+
+    zone1Alt: {
+        label: "Content Column Widths",
+        help: "Width and positioning of content rows",
+        select: {
+            "cols-50|50": { label: "50% / 50%",   zonereverse: "colsrev-50|50" },
+            "cols-33|66": { label: "Copy Narrow", zonereverse: "colsrev-33|66" },
+            "cols-66|33": { label: "Copy Wide",   zonereverse: "colsrev-66|33" },
+        }
+    },
+
+    zone1Above: {
+        label: "Content Row Widths",
+        help: "Width and positioning of content rows",
+        select: {
+            "rows-66|100" : "66% / 100%",
+            "rows-100|100": "100% / 100%",
+            "rows-66|66"  : "66% / 66%",
+        }
+    },
+
+    zone1Below: {
+        label: "Content Row Widths",
+        help: "Width and positioning of content rows",
+        select: {
+            "rowsrev-100|66": "100% / 66%",
+            "rowsrev-66|66" : "66% / 66%"
+        }
+    },
+
+    typography: {
+        label: "Typography Style",
+        select : {
+            default: "Default",
+            larger : "Larger",
+            smaller: "Smaller",
+        }
+    },
+
+    blockIcon: {
+        label: "Block Icon",
+        type: 'icon',
+    },
+
+    eyebrowText: {
+        label: "Eyebrow Text",
+        text: {
+            maxlength: 50,
+        }
+    },
+
+    clickReveal: {
+        label: "Click to Reveal",
+        help: "Content is hidden until clicked",
+        lightswitch : { default: 1 }
+    },
+} -%}
+
+
+{%- set common = common | merge({
+    eyebrows: {
+        icon      : common.blockIcon,
+        eyebrow   : common.eyebrowText,
+    },
+    typobrows: {
+        typography: common.typography,
+        icon      : common.blockIcon,
+        eyebrow   : common.eyebrowText,
+    }
+}, true) -%}
+
+
+{%- set config = {
+    copyNone: {
+        label: "Nothing",
+        help: "No secondary content for this element",
+        constants: {
+            zonelayout: "rows-66|100",
+        },
+    },
+
+    alternate: {
+        label: "Zigzag Copy",
+        help: "Display **Body Copy** beside main content (alternating left/right)",
+        settings: {
+            zonelayout: common.zone1Alt,
+        } | merge( common.typobrows )
+    },
+
+    copyAbove: {
+        label: "Body Copy Above",
+        help: "Single column layout with **Body Copy** above primary content",
+        settings: {
+            zonelayout: common.zone1Above,
+        } | merge( common.typobrows )
+    },
+
+    copyLeft: {
+        label: "Body Copy Left",
+        help: "Two-column layout with **Body Copy** left of primary content",
+        settings: {
+            zonelayout: common.zone1Left,
+        } | merge( common.typobrows )
+    },
+
+    copyRight: {
+        label: "Body Copy Right",
+        help: "Two-column layout with **Body Copy** right of primary content",
+        settings: {
+            zonelayout: common.zone1Right,
+        } | merge( common.typobrows )
+    },
+
+    copyBelow: {
+        label: "Body Copy Below",
+        help: "Single column layout with **Body Copy** below primary content",
+        settings: {
+            zonelayout: common.zone1Below,
+        } | merge( common.typobrows )
+    },
+
+    copyLeftHeader: {
+        label: "Intro + Body Copy Left",
+        help: "**Intro** above two-column layout with **Body Copy** left of primary content",
+        settings: {
+            zonelayout: common.zone1Left,
+        } | merge( common.typobrows )
+    },
+
+    copyRightHeader: {
+        label: "Intro + Body Copy Right",
+        help: "**Intro** above two-column layout with **Body Copy** right primary content",
+        settings: {
+            zonelayout: common.zone1Right,
+        } | merge( common.typobrows )
+    },
+
+    copyBelowHeader: {
+        label: "Intro + Body Copy Below",
+        help: "Single column content sandwich with **Intro** above and **Body Copy** below",
+        settings: {
+            zonelayout: common.zone1Below,
+        } | merge( common.typobrows )
+    },
+} -%}
+
+
+{## Header Builder
+{----------------------------------------------------------------------------#}
+{%- if field == 'headerBuilder' -%}
+    {%- set config = config | withoutKey(['alternate']) -%}
+{%- endif -%}
+
+
+{## Text Block
+{----------------------------------------------------------------------------#}
+{%- if type == 'text' -%}
+    {%- set config = {
+        copyNone: config.copyNone,
+        copyLeft: {
+            label: "Body Copy (2) Right",
+            help: "Two-column layout with **Body Copy** left of secondary content",
+            settings: {
+                zonelayout: common.zone1Left,
+            } | merge( common.typobrows )
+        },
+        copyAbove: {
+            label: "Body Copy (2) Below",
+            help: "Single column with Body Copy (2) below primary copy",
+            settings: {
+                zonelayout: common.zone1Above,
+            } | merge( common.typobrows, true )
+        },
+        copyLeftHeader: {
+            label: "Intro + Copy (2) Right",
+            help: "**Intro** above two-column layout with **Body Copy** left of secondary content",
+            settings: {
+                zonelayout: common.zone1Left,
+            } | merge( common.typobrows )
+        },
+    } -%}
+{%- endif -%}
+
+{%- if type == 'fragment' -%}
+    {%- set config = {
+        copyNone: config.copyNone,
+        copyAbove: config.copyAbove,
+    } -%}
+{%- endif -%}
+
+
+{## Output config options as JSON
+{----------------------------------------------------------------------------#}
+{{- config | json_encode | raw -}}

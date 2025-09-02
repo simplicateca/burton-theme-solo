@@ -1,0 +1,142 @@
+{% extends "_burton/text" -%}
+
+
+{## Text Layer Adjustments   [Site Specific]
+{-------------------------------------------------------------------------------------##}
+{%- macro outline( outline, settings ) -%}
+    <h1>_theme/text::outline()</j1>
+    {# {%- import "_burton" as b -%}
+
+    {%- set settings = settings ??? { _: true } %}
+    {%- set settings = {
+        eyebrow      : null,
+        eyebrow__type: 'eyebrow__basic',
+        separator    : 'small',
+    } | merge(settings) -%}
+
+    {% if outline ??? null %}
+        {{ settings.eyebrow ? b.text( settings.eyebrow, settings.eyebrow__type ) }}
+        {{ tag( 'div', {
+            html : outline,
+            class: 'py-6 border-y-4 border-theme-tint'
+        })}}
+
+        {{- b.sep( settings.separator ) -}}
+    {% endif %} #}
+{%- endmacro -%}
+
+
+{## Basic Eyebrow
+{-------------------------------------------------------------------------------------##}
+{%- macro eyebrow__basic( text, settings ) -%}
+    {%- set text  = text ??? null -%}
+    {%- set icon  = settings.eyebrowicon  ??? null -%}
+    {%- set align = settings.eyebrowalign ??? '' -%}
+
+    {%- if text or icon -%}
+        <div class="eyebrow table {{align}}">
+            <div class="flex flex-col gap-3" data-eyebrow="basic">
+                {% if icon %}
+                    {{ tag( 'div', { html: svg("@appicons/#{icon}.svg")
+                        | attr({ class: ["w-10 fill-theme-accent", align] }) }) }}
+                {% endif %}
+                {{ tag('span', { class: 'text-sm @xl:text-lg uppercase font-headline text-theme-accent font-bold', text: text }) }}
+            </div>
+        </div>
+    {% endif %}
+{%- endmacro %}
+
+{%- macro eyebrow__centerbasic( text, settings ) -%}
+    {{ _self.eyebrow__basic( text, settings | merge({ eyebrowalign: 'mx-auto' }) ) }}
+{%- endmacro -%}
+
+
+
+{## Image Captions
+{-------------------------------------------------------------------------------------##}
+{%- macro image__caption( content, settings ) -%}
+    {%- set content  = content  ??? null and content  is not iterable ? content|trim : '' -%}
+    {%- set settings = settings ?? null is iterable ? settings : {} -%}
+
+    {%- set captionlayer = settings.captionlayer ??? 'default' %}
+
+    {% if caption.alt and not caption.summary %}
+        {%- set caption = caption | merge({ summary: "<p>#{caption.alt}</p>" }) -%}
+    {% endif %}
+
+    {%- set title = tag( 'strong', { class: 'block text-sm uppercase', text: caption.title ?? null } ) -%}
+    {%- set content = caption.summary ?? null %}
+
+    {%- set content = content
+        | retconChange( 'p', 'div' )
+        | retconAttr( 'div', { class: 'text-sm' }, false ) -%}
+
+    {% if captionlayer == 'title' and title %}
+        <figcaption class="text-center">
+            {{ title | raw }}
+        </figcaption>
+    {% endif %}
+
+    {% if captionlayer == 'caption' and content %}
+        <figcaption class="text-center">
+            {{ content | raw }}
+        </figcaption>
+    {% endif %}
+
+    {% if captionlayer == 'full' and ( title ?? content ) -%}
+        <figcaption class="text-center">
+            {{ title | raw }}
+            {{ content | raw }}
+        </figcaption>
+    {% endif %}
+{%- endmacro -%}
+
+
+{## Text Alignment / Margin Matching Macro
+{---------------------------------------------------------------------------------------}
+    This Macro will accept a string of HTML and find the text alignment of the first
+    block level element in the HTML string.
+
+  * Note: This macro ignores any `<div class='eyebrow'>` elements that appear at th
+    start of the HTML string. Often because they are the thing that needs alignment
+    to match the headline above which it appears.
+
+    Other times you need to match the alignment of a text zone within the layout so
+    that it matches the content alignment (particularly opening headlines).
+
+    For example, if you have a single text zone that:
+
+     - Not as wide as your container
+     - Defaults to left alignment
+     - Has content that is justified center
+
+    Before:                                 After:
+    ┌----------------------------┐          ┌----------------------------┐
+    |   This headline   |        |          |    |   This zone is    |   |
+    |    is centered    |        |          |    |     centered      |   |
+    |                   |        |          |    |                   |   |
+    |    Which feels    |        |    vs    |    |    Which feels    |   |
+    |      awkward      |        |          |    |      better.      |   |
+    └----------------------------┘          └----------------------------┘
+           Zone 1         Margin            Margin      Zone 1      Margin
+
+
+    This macro helps resolve that situation by letting you peak at the text alignment
+    of the first block level element in the text zone and use it to decide whether
+    or not you want to change something about the selected zonelayout.
+
+    You could even decide to silently pass the content off to a different zonelayout
+    that is better suited to the alignment of the content.
+{-------------------------------------------------------------------------------------##}
+{%- macro margin_from_alignment( html = "" ) -%}{% apply spaceless -%}
+    {%- set html  = html | trim -%}
+    {% if html %}
+    {%- set attrs = html | retconRemove( '.eyebrow' ) | retconUnwrap( [ 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' ] ) | parseAttr -%}
+    {%- set style = attrs.style['text-align'] ?? null -%}
+    {%- set class = attrs.class ?? null -%}
+    {%- set align = ( 'text-center' in class or style == 'center' ) ? 'mx-auto' -%}
+    {%- set align = ( 'text-left'   in class or style == 'left'   ) ? 'mr-auto' : align -%}
+    {%- set align = ( 'text-right'  in class or style == 'right'  ) ? 'ml-auto' : align -%}
+    {{- align -}}
+    {% endif %}
+{%- endapply %}{%- endmacro -%}

@@ -1,0 +1,474 @@
+{## Site Specific HTML Skeleton
+{-------------------------------------------------------------------------------------##}
+{%- extends "_burton/html" -%}
+
+{## Default Configuration
+{---------------------------------------------------------------------------------------}
+    <html>, <head>, and <body> settings
+{-------------------------------------------------------------------------------------##}
+{%- block html__class "no-js opacity-100 visible scroll-smooth" -%}
+{%- block body__class "font-body text-theme-body m-0 p-0 min-h-screen h-full bg-gray-100" -%}
+
+{%- block head__meta -%}
+    {%- from _self import prefetch -%}
+    {{- prefetch([
+        'https://unpkg.com',
+        'https://cdn.polyfill.io',
+        'https://cdn.jsdelivr.net',
+        'https://fonts.googleapis.com',
+        'https://fonts.gstatic.com',
+    ]) -}}
+
+    {{- parent() -}}
+{% endblock %}
+
+{% block head__css %}
+    {% css %}
+        [v-cloak], [x-cloak] { display: none !important; }
+        html{ visibility: hidden; opacity:0; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            color: #171717;
+            background-color: #f5f5f5;
+        }
+
+        {%- set scheme = scheme ?? null -%}
+        {{ _self.theme__colors( scheme ) -}}
+        {{ _self.theme__light( scheme )   -}}
+        {{ _self.theme__dark( scheme )    -}}
+        {{ _self.theme__accent( scheme )  -}}
+    {% endcss %}
+{%- endblock -%}
+
+{% block head__fonts %}
+    {%- from _self import fontface -%}
+    <style>
+        {{ fontface( 'Lato', 'Lato-Light',    300 ) }}
+        {{ fontface( 'Lato', 'Lato-Regular',  400 ) }}
+        {{ fontface( 'Lato', 'Lato-Medium',   500 ) }}
+        {{ fontface( 'Lato', 'Lato-Semibold', 600 ) }}
+        {{ fontface( 'Lato', 'Lato-Black',    900 ) }}
+    </style>
+{% endblock %}
+
+{% block head__js %}
+    {%- import '_theme/javascript' as javascript -%}
+    {# {{- javascript.polyfillio() -}} #}
+    {{- javascript.vite() -}}
+    {{- javascript.htmx_cdn() -}}
+    {{- javascript.alpine_cdn() -}}
+    {{- javascript.waitForGlobal() -}}
+    {{- javascript.cookie() -}}
+    {{- javascript.enabledCheck() -}}
+    {{- javascript.globalVars() -}}
+    {{- javascript.tabHandler() -}}
+{%- endblock -%}
+
+
+{## Branding, Primary Navigation & Content Header
+--------------------------------------------------------------------------------------##}
+{%- block topline -%}
+
+    {%- block masthead -%}
+        {%- import "_burton" as b -%}
+        {{- tag( 'section', {
+            id: 'masthead',
+            html: b.container( block('interface'), 'fluid' ),
+            data: { theme: 'accent' },
+            class: 'relative z-10 canvas',
+        }) -}}
+
+        {{ include( "_theme/panel", {
+            handle: 'megamenu',
+            content: block('megamenu')
+        }, withContext = false ) }}
+    {%- endblock -%}
+
+
+    {%- block header -%}
+        {%- import "_burton" as b -%}
+
+        {%- set hBuilder = b.builder( entry, "header" ) -%}
+        {%- set hTheme   = hBuilder|parseAttr.data.theme ?? null -%}
+        {%- set hasTitle = hBuilder|retconOnly('h1') -%}
+        {%- set crumbs   = block('breadcrumb') -%}
+
+        {{- hasTitle is empty ? hBuilder -}}
+
+        {{- tag( "header", {
+            id  : "header",
+            role: "banner",
+            html: hasTitle ? hBuilder : block('h1'),
+            data: { theme: hasTitle ? hTheme : "neutral" },
+            class: [ hasTitle ? "canvas" ],
+        }) | prepend( hTheme not in ['light'] ? tag( "div", { html: crumbs, class: "absolute w-full" } ) )
+           | append(  hTheme in ['light'] ? crumbs ) -}}
+    {%- endblock -%}
+{%- endblock -%}
+
+
+{%- block h1 -%}
+    {%- import "_burton" as b -%}
+    {## TODO: Remove titleEntriched ##}
+    {%- set h1 = b.text( entry.details.long ?? entry.titleEnriched ?? entry.title ?? '', 'h1')
+        | attr({ class: "py-16" }) -%}
+
+    {# {%- set b1 = entry.bodyBuilder.one() ??? null -%} #}
+    {# {%- if b1.frame.theme ?? null -%}
+        {%- set b1 = b.builder( [b1], "body", entry: entry ) | retconOnly("[data-zone='1']") | parseAttr -%}
+        {%- if 'mx-auto' in b1.class ?? [] -%}
+            {%- set h1 = h1 | attr({ class: ['mx-auto'] } ) -%}
+        {%- endif -%}
+    {%- endif -%} #}
+
+    {{- b.container( h1, 'fluid' ) -}}
+{%- endblock -%}
+
+
+{%- block breadcrumb -%}
+    {%- import "_burton" as b -%}
+    {%- set crumbmenu = b.menu('breadcrumb')|trim -%}
+    {%- if crumbmenu is not empty -%}
+        {{ b.container( crumbmenu, 'fluid' ) | attr({
+            class: "relative z-10 opacity-50 hover:opacity-100 focus-within:opacity-100 text-sm"
+        }) }}
+    {%- endif -%}
+{%- endblock -%}
+
+
+{%- block interface -%}
+    <div class="flex py-4">
+        <div class="absolute translate-y-8 2xs:translate-y-4 xs:translate-y-2 3sm:translate-y-0 xs:relative">
+            {{- block('logo') -}}
+        </div>
+        <div class="flex flex-col w-full justify-between items-end">
+            {%- block navigation -%}
+                {%- block navigation__utility -%}
+                    {%- import "_burton" as b -%}
+                    {{- b.menu( 'utility', 'popup' ) -}}
+                {%- endblock -%}
+
+                {%- block navigation__primary -%}
+                    {%- import "_burton" as b -%}
+                    {{- b.menu( 'primary' ) -}}
+                {%- endblock -%}
+            {%- endblock -%}
+        </div>
+    </div>
+{%- endblock -%}
+
+
+
+{## Primary Content Area
+--------------------------------------------------------------------------------------##}
+{%- block main -%}
+
+    {## Two Column Layout (with <aside>)
+    {---------------------------------------------------------------------------------##}
+    {%- set sidebarContent = block('aside') | trim -%}
+    {%- if sidebar ?? sidebarContent is not empty -%}
+        {%- import "_burton" as b -%}
+        {%- set sidebar = sidebar ?? 'right' -%}
+        {{- b.zonelayout( {
+            zone1 : block('content'),
+            zone2 : sidebarContent,
+        }, "aside_#{sidebar}" | camel ) -}}
+
+    {## Single Column Layout
+    {---------------------------------------------------------------------------------##}
+    {%- else -%}
+        {{- parent() | retconAttr( 'main', {
+            id   : 'content',
+            class: 'relative z-10 min-h-[50vh]',
+        }) -}}
+    {%- endif -%}
+
+{%- endblock -%}
+
+
+
+{## Sidebar Content
+{-------------------------------------------------------------------------------------##}
+{%- block aside -%}
+    {%- import "_burton" as b -%}
+    {{- b.builder( entry, "sidebar" ) -}}
+{%- endblock -%}
+
+
+
+{## Call to Action, Footer & Bottom Navigation
+--------------------------------------------------------------------------------------##}
+{%- block bottomline -%}
+    {%- import "_burton/modal" as modal -%}
+    {{- modal.dynamic_target() -}}
+
+    {{- tag( 'footer', {
+        id   : 'footer',
+        role : 'contentinfo',
+        class: 'relative z-20 canvas',
+        data : { theme: 'accent' },
+        html : block('footer')
+    }) -}}
+{% endblock %}
+
+
+{% block footer %}
+    {%- import "_burton" as b -%}
+    {{- b.container( block('footer__upper'), 'fluid' ) -}}
+
+    <div class="bg-black py-2">
+        {{- b.container( block('footer__lower'), 'fluid' ) -}}
+    </div>
+{% endblock %}
+
+
+
+{## Micellaneous Components
+--------------------------------------------------------------------------------------##}
+{%- block logo -%}
+    <a x-cloak x-data href="{{ siteUrl('/') }}" class="aspect-square text-theme-accent"
+    ><svg xmlns="http://www.w3.org/2000/svg" class="block h-12 3xs:h-16 3sm:h-20 sm:h-24 fill-current" viewBox="6.58 6.5 66.85 66.82">
+        <path d="m51.8 20.7 17.9 52.6H36.9c1.4-3.9 6.5-12.6 24-16l-4-12-15.7 6.3 10.6-31Zm21.6 21v-35H61.9l11.5 35ZM6.6 6.6v66.7h13.1L42.5 6.5H6.6Z"></path>
+    </svg></a>
+{%- endblock -%}
+
+
+{%- block footer__upper -%}
+    <div data-builder='footer' class="flex flex-col lg:flex-row-reverse gap-20 py-16">
+        {%- block footer__cta -%}
+            <div class="w-full @container lg:max-w-1/2 bg-theme-tint rounded-br-[10rem] -mt-28" x-data>
+                <div class="w-full h-full flex justify-center items-center relative">
+                    <a x-on:click.prevent="" href="#" class="h4 p-10 !mb-0 click-cover">Call to Action</a>
+                </div>
+            </div>
+        {%- endblock -%}
+
+        <div class="w-full @container lg:max-w-1/2 flex flex-col gap-8">
+            {%- import "_burton" as b -%}
+            {{- b.menu( 'streams',   'footer' ) -}}
+            {{- b.menu( 'evergreen', 'footer' ) -}}
+        </div>
+    </div>
+{%- endblock -%}
+
+
+{%- block footer__lower -%}
+    <div class="flex flex-col-reverse xl:flex-row-reverse gap-4">
+        <div class="w-full @container flex-grow">
+            {%- import "_burton" as b -%}
+            {{- b.menu( 'legal' ) | retconAttr( 'a',  { class: ["text-base"] }) -}}
+        </div>
+        <div class="@lg:whitespace-nowrap text-white">© 1970-{{ "now"|date("Y") }} The Art of Productions Inc. All&nbsp;rights reserved.</div>
+    </div>
+{%- endblock -%}
+
+
+
+{## Social Media Icons & Links
+--------------------------------------------------------------------------------------##}
+{%- macro social() -%}
+    {%- set accounts = seomatic.site.sameAsLinks ??? [] %}
+    {% if accounts is iterable and accounts | length %}
+        <div class="flex flex-row gap-2 mt-8">
+            {% for social in accounts %}
+                {% if social.url %}
+                    <div>
+                        <a href="{{social.url ??? '#'}}" class="flex" title="{{social.siteName}}" target="_blank" rel="noopener">
+                            <span class="h-8 w-8 xl:w-10 xl:h-10">{{ svg( '@webroot/static/svg/#{social.handle}.svg' ) }}</span>
+                        </a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+{%- endmacro -%}
+
+
+{## Drop Down Menu
+--------------------------------------------------------------------------------------##}
+{%- block megamenu -%}
+    <h1>Mega Menu</h1>
+{%- endblock -%}
+
+
+
+
+
+{## Theme Colours
+{---------------------------------------------------------------------------##}
+{%- macro theme__colors(scheme) -%}
+    :root {
+        --white: 255 255 255;
+        --black: 255 255 255;
+
+        --corpo-blue-300: 15 49 64;
+        --corpo-blue-500: 26 85 112;
+        --corpo-blue-700: 19 61 80;
+        --corpo-blue-900: 11 37 48;
+
+        --corpo-gold: 236 166 33;
+
+        --blue-50 : 239 246 255;
+        --blue-100: 219 234 254;
+        --blue-200: 191 219 254;
+        --blue-300: 147 197 253;
+        --blue-400: 96 165 250;
+        --blue-500: 59 130 246;
+        --blue-600: 37 99 235;
+        --blue-700: 29 78 216;
+        --blue-800: 30 64 175;
+        --blue-900: 30 58 138;
+        --blue-950: 23 37 84;
+
+        --sky-50 : 240 249 255;
+        --sky-100: 224 242 254;
+        --sky-200: 186 230 253;
+        --sky-300: 125 211 252;
+        --sky-400: 56 189 248;
+        --sky-500: 14 165 233;
+        --sky-600: 2 132 199;
+        --sky-700: 3 105 161;
+        --sky-800: 7 89 133;
+        --sky-900: 12 74 110;
+        --sky-950: 8 47 73;
+
+        --neutral-50: 250 250 250;
+        --neutral-100: 245 245 245;
+        --neutral-200: 229 229 229;
+        --neutral-300: 212 212 212;
+        --neutral-400: 163 163 163;
+        --neutral-500: 115 115 115;
+        --neutral-600: 82 82 82;
+        --neutral-700: 64 64 64;
+        --neutral-800: 38 38 38;
+        --neutral-900: 23 23 23;
+        --neutral-950: 10 10 10;
+
+        --background      : transparent;
+        --background-tint : var(--neutral-200);
+        --background-tint2: var(--neutral-300);
+        --headings        : var(--neutral-800);
+        --headings-alt    : var(--white);
+        --body            : var(--neutral-900);
+        {{ _self.neutral__text( scheme ) }}
+    }
+{%- endmacro -%}
+
+
+{%- macro theme__light( scheme ) %}
+    *[data-theme="light"] {
+        --background      : var(--white);
+        --background-tint : var(--neutral-200);
+        --background-tint2: var(--neutral-300);
+
+        --headings        : var(--neutral-800);
+        --headings-alt    : var(--white);
+        --body            : var(--neutral-900);
+
+        {{ _self.neutral__text( scheme ) }}
+    }
+{%- endmacro -%}
+
+
+{%- macro theme__dark( scheme ) %}
+    *[data-theme="dark"] {
+        --background      : var(--corpo-blue-300);
+        --background-tint : var(--corpo-blue-900);
+        --background-tint2: var(--corpo-blue-700);
+
+        --headings        : var(--neutral-300);
+        --headings-alt    : var(--corpo-blue-300);
+        --body            : var(--neutral-200);
+
+        {{ _self.dark__text( scheme ) }}
+    }
+{%- endmacro -%}
+
+
+{%- macro theme__accent( scheme ) %}
+    *[data-theme="accent"] {
+        --background      : var(--corpo-blue-300);
+        --background-tint : var(--corpo-blue-900);
+        --background-tint2: var(--corpo-blue-700);
+
+        --headings        : var(--neutral-300);
+        --headings-alt    : var(--corpo-blue-300);
+        --body            : var(--neutral-200);
+
+        {{ _self.dark__text( scheme ) }}
+    }
+{%- endmacro -%}
+
+
+{## Foreground Text
+{---------------------------------------------------------------------------##}
+{%- macro neutral__text( scheme ) -%}
+    {%- set scheme = scheme ?? "base" -%}
+    {% switch scheme %}
+        {% case "lw" %}
+            --highlight       : 85 55 117;   /**  553775  |  purple-300   **/
+            --link            : 101 75 153;  /**  654b99  |  purple-800   **/
+            --link-tint       : var(--corpo-gold);
+            --accent          : var(--corpo-blue-300);
+            --accent-tint     : var(--blue-800);
+            --accent-alt      : var(--white);
+        {% case "ls" %}
+            --highlight       : 47 79 138;   /**  2F4F8A  |  blue-300     **/
+            --link            : 57 96 168;   /**  3960A8  |  blue-800     **/
+            --link-tint       : var(--corpo-gold);
+            --accent          : var(--corpo-blue-300);
+            --accent-tint     : var(--blue-800);
+            --accent-alt      : var(--white);
+        {% case "fl" %}
+            --highlight       : 37 117 97;   /**  257561  |  green-300    **/
+            --link            : 50 157 130;  /**  329D82  |  green-800    **/
+            --link-tint       : var(--corpo-gold);
+            --accent          : var(--corpo-blue-300);
+            --accent-tint     : var(--blue-800);
+            --accent-alt      : var(--white);
+        {% default %}
+            --highlight       : var(--corpo-blue-500);
+            --link            : var(--blue-800);
+            --link-tint       : var(--corpo-gold);
+            --accent          : var(--corpo-blue-300);
+            --accent-tint     : var(--blue-800);
+            --accent-alt      : var(--white);
+    {% endswitch %}
+{%- endmacro -%}
+
+
+{%- macro dark__text( scheme ) -%}
+    {%- set scheme = scheme ?? "base" -%}
+    {%- switch scheme -%}
+        {%- case "lw" -%}
+            --highlight       : 72 29 109;   /**  481d6d  |  purple-600   **/
+            --link            : 167 139 250; /**  a78bfa  |  purple-400   **/
+            --link-tint       : var(--corpo-gold);
+            --accent          : 85 55 117;   /**  553775  |  purple-300   **/
+            --accent-tint     : 167 139 250; /**  a78bfa  |  purple-400   **/
+            --accent-alt      : 38 38 38;    /**  262626  |  white        **/
+        {%- case "ls" -%}
+            --highlight       : 36 90 184;   /**  245AB8  |  blue-600     **/
+            --link            : 133 167 230; /**  85A7E6  |  blue-400     **/
+            --link-tint       : var(--corpo-gold);
+            --accent          : 47 79 138;   /**  2F4F8A  |  blue-300     **/
+            --accent-tint     : 133 167 230; /**  85A7E6  |  blue-400     **/
+            --accent-alt      : 38 38 38;    /**  262626  |  white        **/
+        {%- case "fl" -%}
+            --highlight       : 0 179 133;   /**  00B385  |  green-600     **/
+            --link            : 85 193 165;  /**  55C1A5  |  green-400     **/
+            --link-tint       : var(--corpo-gold);
+            --accent          : 37 117 97;   /**  257561  |  green-300     **/
+            --accent-tint     : 85 193 165;  /**  55C1A5  |  green-400     **/
+            --accent-alt      : 38 38 38;    /**  262626  |  white         **/
+        {%- default -%}
+            --highlight       : var(--corpo-blue-500);
+            --link            : var(--sky-500);
+            --link-tint       : var(--corpo-gold);
+            --accent          : var(--sky-800);
+            --accent-tint     : var(--sky-300);
+            --accent-alt      : var(--sky-200);
+    {%- endswitch -%}
+{%- endmacro -%}

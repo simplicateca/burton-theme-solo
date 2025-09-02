@@ -1,0 +1,68 @@
+{## _theme/settings/block._component.twig
+{----------------------------------------------------------------------------#}
+{%- set type  = element.type.handle  ?? null -%}
+{%- set field = element.field.handle ?? null -%}
+
+{%- set options = [] -%}
+
+{%- for handle, title in collect( craft.formie.forms({ templateId: 1}) )
+    .sortBy('title', SORT_NATURAL)
+    .pluck( 'title', 'handle' ) -%}
+
+    {%- set options = loop.first
+        ? options | push({ label: "Data Collection" })
+        : options -%}
+
+    {%- set options = options | push({
+        value: "form_#{handle}",
+        label: "[Form] #{title}",
+        help: "Render a form created in Formie",
+        constants: {
+            title : title,
+            handle: handle,
+            type  : "form",
+        },
+        settings: {
+
+        }
+    }) -%}
+{%- endfor -%}
+
+
+{%- for handle, title in collect( craft.navigation.getAllNavs() )
+    .sortBy('name', SORT_NATURAL)
+    .pluck( 'name', 'handle' ).all() -%}
+
+    {%- set options = loop.first
+        ? options | push({ label: "User Navigation" })
+        : options -%}
+
+    {%- set options = options | push({
+        value: "menu_#{handle}",
+        label: "[Menu] #{title}",
+        help: "Render a Navigation Menu",
+        constants: {
+            title : title,
+            handle: handle,
+            type  : "menu",
+        },
+        settings: {
+
+        }
+    }) -%}
+{%- endfor -%}
+
+{%- set options = options | push({
+    value: "system_comments",
+    label: "[System] Display Comments",
+    help: "Show Comments Related to this Entry",
+    constants: {
+        type  : 'system',
+        handle: 'comments'
+    },
+    settings: {
+
+    }
+}) -%}
+
+{{- options | json_encode | raw -}}

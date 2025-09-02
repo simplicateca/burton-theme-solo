@@ -1,0 +1,33 @@
+{
+    "name": "simplicateca/burton-theme-solo",
+    "description": "Solo is a Burton Protosite Base Theme for Craft CMS 5+",
+    "type": "craft-plugin",
+    "keywords": ["craft-cms", "theme", "custom-theme"],
+    "license": "MIT",
+    "authors": [{
+        "name": "Simplicate",
+        "homepage": "https://simplicate.ca"
+    }],
+    "support": {
+        "email" : "info@simplicate.ca"
+    },
+    "repositories": [{
+        "type": "vcs",
+        "url": "https://github.com/simplicateca/craft-burton-plugin"
+    }],
+    "require": {
+        "craftcms/cms": "^5.0.0",
+        "simplicateca/craft-burton-plugin": "dev-develop",
+        "openai-php/client": "^0.8.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "simplicateca\\burtonsolo\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Solo - Burton Theme",
+        "handle": "burtonsolo",
+        "class": "simplicateca\\burtonsolo\\SoloTheme"
+    }
+}

@@ -1,0 +1,240 @@
+{## _theme/media.twig
+{-------------------------------------------------------------------------------------##}
+{%- extends "_burton/media" -%}
+
+
+{# {%- macro player__background() -%} #}
+
+
+    {## TODO: Implement
+    {---------------------------------------------------------------------------------------}
+        Original ource: https://codepen.io/songyima/pen/VKbyYG
+    {-------------------------------------------------------------------------------------##}
+    {##-------------------------------------------------------------------------------------}
+        <div class="fullscreen-video-background">
+            <div class="_pattern-overlay"></div>
+            <div id="_buffering-background"></div>
+            <div id="_youtube-iframe-wrapper">
+                <div id="_youtube-iframe" data-youtubeurl="0vrdgDdPApQ"></div>
+            </div>
+        </div>
+
+        <script>
+            // 2. This code loads the Youtube IFrame Player API code asynchronously.
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+            // 3. This function creates an <iframe> (and YouTube player)
+            //    after the API code downloads.
+            var youtubePlayer;
+            var _youtube_id = document.getElementById('_youtube-iframe');
+
+            function onYouTubeIframeAPIReady() {
+                youtubePlayer = new YT.Player('_youtube-iframe', {
+                    videoId: _youtube_id.dataset.youtubeurl,
+                    playerVars: { // https://developers.google.com/youtube/player_parameters?playerVersion=HTML5
+                        cc_load_policy: 0, // closed caption
+                        controls: 0,
+                        disablekb: 0, //disable keyboard
+                        iv_load_policy: 3, // annotations
+                        playsinline: 1, // play inline on iOS
+                        rel: 0, // related videos
+                        showinfo: 0, // title
+                        modestbranding: 3 // youtube logo
+                    },
+                    events: {
+                        'onReady': onYoutubePlayerReady,
+                        'onStateChange': onYoutubePlayerStateChange
+                    }
+                });
+            }
+
+            function onYoutubePlayerReady(event) {
+                event.target.mute();
+                event.target.playVideo();
+            }
+
+            function onYoutubePlayerStateChange(event) {
+                if (event.data == YT.PlayerState.PLAYING) { // fade out #_buffering-background
+                    Velocity(document.getElementById('_buffering-background'), { opacity: 0 }, 500);
+                }
+
+                if (event.data == YT.PlayerState.ENDED) { // loop video
+                    event.target.playVideo();
+                }
+            }
+        </script>
+    {-------------------------------------------------------------------------------------##}
+{# {%- endmacro -%} #}
+
+{##-------------------------------------------------------------------------------------}
+
+{% block media__sources -%}
+    {%- if item.url ??? null and item.mimeType ??? null -%}
+        <source src="{{item.url}}" type="{{item.mimeType}}"/>
+    {%- endif %}
+{% endblock %}
+
+
+{% block media__transcript -%}
+    {%- if item.transcript ??? null %}
+        <a href="#">Transcript Available</a>
+    {%- endif -%}
+{%- endblock %}
+
+
+{%- block audio__sources block( 'media__sources' ) -%}
+{%- block video__sources block( 'media__sources' ) -%}
+
+{%- block audio__transcript block( 'media__transcript' ) -%}
+{%- block video__transcript block( 'media__transcript' ) -%}
+
+{-------------------------------------------------------------------------------------##}
+
+
+    {## Prepare Poster / Cover Image ##}
+    {# {%- set poster = poster ??? null and poster is not iterable ? { class: poster } : poster -%}
+    {%- set poster = {
+        imgclass: settings.audio__posterclass ?? settings.posterclass ?? block('audio__posterclass'),
+    } | merge( poster ) -%} #}
+
+    {## Prepare Figure wrapper (just in case) ##}
+    {# {%- set figure = figure ??? null and figure is not iterable ? { class: figure } : figure -%}
+    {%- set figure = {
+        class: settings.audio__figureclass ?? settings.figureclass ?? block('audio__figureclass'),
+        'x-data': '{
+            open: false,
+            toggle() {
+                this.open = true
+                this.$nextTick( () => {
+                    const player = document.querySelector("#' ~ uuid ~ '")
+                    if( player ) { player.paused ? player.play() : player.pause() }
+                })
+            }
+        }',
+    } | merge( figure ) -%} #}
+
+    {## Prepare the <img> tag for the poster image ##}
+    {# {%- from "_theme/image" import imgtag -%}
+    {%- set imgtag = imgtag(item.images, poster) ?? null -%} #}
+
+    {## Add simple alpine JS click to toggle the poster image ##}
+    {# {%- set imgtag = imgtag ? raw( imgtag | attr({
+        'x-on:click': "toggle",
+        class: "cursor-pointer"
+    }) ) -%} #}
+
+    {## Prepare the transcript link ##}
+    {# {%- set transcript = block( 'audio__transcript' ) ??? null %}
+
+    {%- set audiohtml = raw ( audiotag ~ transcript ) -%} #}
+
+    {## If a poster img exists, wrap a <figure> around the <img> and <audio> tags ##}
+    {# {%- if imgtag -%}
+        {%- embed ['_theme/image'] with {
+            imgtag   : imgtag,
+            figure   : figure,
+            settings : settings,
+            audiohtml: audiohtml
+        } only %}
+            {% block caption audiohtml %}
+            {% block captiontag "div" -%}
+        {% endembed -%} #}
+
+    {## Otherwise just output the <audio> element ##}
+    {# {%- else %}{{ audiohtml }}{% endif -%} #}
+{# {%- endif %}{% endblock %} #}
+
+
+
+{# {% block video -%}
+    {%- set media = media[0] ??? media ??? null -%}
+
+    {{- media ? tag( 'video', {
+        id      : "video#{random()}",
+        controls: true,
+        preload : true,
+        class   : "aspect-video w-full",
+        html    : block('source')
+    } ) -}} #}
+
+
+    {## Prepare Poster / Cover Image ##}
+    {# {%- set poster = poster ?? null is iterable ? poster : {} -%}
+    {%- set poster = {
+        imgclass: settings.video__posterclass ?? settings.posterclass ?? block('video__posterclass'),
+        _placeholder: 'widescreen'
+    } | merge( poster ) -%} #}
+
+    {## Prepare Figure Wrapper (just in case) ##}
+    {# {%- set figure = figure ?? null is iterable ? figure : {} -%}
+    {%- set figure = {
+        class: settings.video__figureclass ?? settings.figureclass ?? block('video__figureclass'),
+        'x-data': "{
+            open: false,
+            play() {
+                this.open = true
+                $nextTick(() => { $refs.#{uuid}.play() } )
+            }
+        }",
+    } | merge( figure ) -%} #}
+
+
+    {## Prepare the <img> tag for the poster image ##}
+    {# {%- from "_theme/image" import imgtag -%}
+
+    {%- set imgtag = imgtag(item.images ??? null, poster) ?? null -%}
+    {%- set layer  = layer ??? 'native' %} #}
+
+    {## Add simple alpine JS click to toggle the poster image ##}
+    {# {%- set imgtag = imgtag and medialayer != 'native' ? raw( imgtag | attr({
+        'x-on:click': "play",
+        'x-show': "!open",
+        class: "cursor-pointer"
+    }) ) -%} #}
+
+    {## Is this an external video embed? ##}
+    {# {% if item.oembed.html ??? null %}
+        {%- set videotag = item.oembed.html
+            | retconAttr( 'iframe', { height: false, width: false, class: video.class } ) -%}
+
+        {%- set figure = {
+            'x-data': "{
+                open: false
+            }",
+        } | merge( figure ) -%}
+
+        {% if videotag and imgtag and medialayer != 'native' %}
+            Here?
+            {%- set videotag -%}
+                <template x-if="open">
+                    {{ raw( videotag | replace({
+                        '?feature=oembed': '?feature=oembed&autoplay=1&mute=1&enablejsapi=1'
+                    }) ) }}
+                </template>
+            {%- endset %}
+        {% endif %}
+    {% endif %} #}
+
+    {## Prepare the transcript link ##}
+    {# {%- set transcript = block( 'video__transcript' ) ??? null %}
+
+    {%- set videohtml  = raw( videotag ~ transcript ) -%}
+    {{ videohtml }} #}
+    {## If a poster img exists, wrap a <figure> around the <img> and <video> tags ##}
+    {# {%- if imgtag -%}
+        {%- embed ['_theme/image'] with {
+            imgtag   : imgtag,
+            figure   : figure,
+            settings : settings,
+            videohtml: videohtml,
+        } only %}
+            {% block caption videohtml %}
+            {% block captiontag "div" -%}
+        {% endembed -%} #}
+
+    {## Otherwise just output the <video> element ##}
+    {# {%- else %}{{ videohtml }}{% endif -%} #}
+{# {%- endif %}{% endblock %} #}

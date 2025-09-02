@@ -1,0 +1,172 @@
+{## Block Theme - Meta Field Config
+{----------------------------------------------------------------------------#}
+{%- set type  = element.type.handle  ?? null -%}
+{%- set field = element.field.handle ?? null -%}
+{%- set entry = element.primaryOwner ?? null -%}
+
+
+{## Common Meta Fields
+{----------------------------------------------------------------------------#}
+{%- set common = {
+    canvas: {
+        label: "Background Coverage",
+        help: "",
+        select: {
+            bleed: { label: "Edge-to-Edge Bleed" },
+            frame: { label: "Frame with Edge Margin" },
+            tight: { label: "Tight Focus on Content" },
+            zone1: { label: "Primary Content (Zone1)" },
+            zone2: { label: "Secondary Content (Zone2)" },
+        },
+    },
+
+    schemes: {
+        label: "Theme",
+        help: "",
+        select: {
+            auto       : { label: "Auto Theme",        theme:"auto",   canvas: "bleed" },
+            light      : { label: "Light",             theme:"light",  canvas: "bleed" },
+            lightFrame : { label: "Light (Bordered)",  theme:"light",  canvas: "frame" },
+            lightTight : { label: "Light (Focused)",   theme:"light",  canvas: "tight" },
+            accent     : { label: "Accent",            theme:"accent", canvas: "bleed" },
+            accentDark : { label: "Accent (Dark)",     theme:"dark",   canvas: "bleed" },
+            accentFrame: { label: "Accent (Bordered)", theme:"accent", canvas: "frame" },
+            accentTight: { label: "Accent (Focused)",  theme:"accent", canvas: "tight" },
+            accentSwap : { label: "Accent (Reversed)", theme:"accent", canvas: "bleed" },
+        },
+    },
+
+    headerSchemes: {
+        label: "Theme",
+        help: "",
+        select: {
+            accent     : { label: "Accent",        theme:"accent", canvas: "bleed" },
+            accentDark : { label: "Accent (Alt)",  theme:"dark",   canvas: "bleed" },
+            light      : { label: "Light",         theme:"light",  canvas: "bleed" },
+        },
+    },
+
+    maxWidth: {
+        label: "Content Width",
+        help: "",
+        select: {
+            auto:       { label: "Auto",                 container: "fluid"   },
+            widescreen: { label: "Default (Widescreen)", container: "fluid"   },
+            desktop:    { label: "Portrait (Desktop)",   container: "desktop" },
+            tablet:     { label: "Narrow (Tablet)",      container: "tablet"  },
+            full:       { label: "Edge-to-Edge (Full)",  container: "none"    },
+        },
+    },
+
+    eyecandy: {
+        label: "Eye Candy",
+        help: "",
+        select: {
+            auto:   { label: "Auto" },
+            path:   { label: "Guided Path" },
+            reveal: { label: "Animated Reveal" },
+            hr:     { label: "Horizontal Rule" },
+            drips:  { label: "Drips" },
+            wave:   { label: "Wave"  },
+            tilt:   { label: "Tilt"  },
+            stars:  { label: "Parallax Stars" },
+        },
+    },
+
+    headerCandy: {
+        label: "Eye Candy",
+        help: "",
+        select: {
+            auto:   { label: "Auto" },
+            reveal: { label: "Animated Reveal" }
+        },
+    },
+
+    neutralCandy: {
+        label: "Eye Candy",
+        help: "",
+        select: {
+            auto:   { label: "Auto" },
+            path:   { label: "Guided Path" },
+            reveal: { label: "Animated Reveal" },
+            hr:     { label: "Horizontal Rule" },
+            stars:  { label: "Parallax Stars" },
+        },
+    },
+
+    limitedCandy: {
+        label: "Eye Candy",
+        help: "",
+        select: {
+            auto:   { label: "Auto" },
+            path:   { label: "Guided Path" },
+            reveal: { label: "Animated Reveal" },
+            hr:     { label: "Horizontal Rule" },
+        },
+    },
+} -%}
+
+
+{## Prepare Configuration Options
+{----------------------------------------------------------------------------#}
+{%- set fields = {
+    default: {
+        value: "default",
+        label: "Default",
+        help: "",
+        constants: {
+            theme: "neutral",
+        },
+        settings: {
+            maxwidth: common.maxWidth,
+            eyecandy: field == 'headerBuilder'
+                ? common.headerCandy
+                : common.neutralCandy,
+        },
+    },
+
+    themed: {
+        value: "themed",
+        label: "Themed",
+        help: "",
+        settings: {
+            scheme: field == 'headerBuilder'
+                ? common.headerSchemes
+                : common.schemes,
+            maxwidth: common.maxWidth,
+            eyecandy: field == 'headerBuilder'
+                ? common.headerCandy
+                : common.eyecandy,
+        },
+    },
+
+    inherit: {
+        value: "inherit",
+        label: "Inherit",
+        help : "Matches the frame settings of the previous block.",
+        settings: {
+            maxwidth: common.maxWidth,
+            eyecandy: common.limitedCandy,
+        },
+    },
+
+    fragment: {
+        value: "fragment",
+        label: "Fragment",
+        help : "Matches the frame settings of the previous block.",
+        settings: {
+            maxwidth: common.maxWidth,
+            eyecandy: common.limitedCandy,
+        },
+    },
+} -%}
+
+{## Output config options as JSON
+{----------------------------------------------------------------------------#}
+{%- set config = (type == "fragment")
+    ? [fields.fragment, fields.default, fields.themed]
+    : (field == "headerBuilder")
+        ? [fields.default, fields.themed]
+        : [fields.default, fields.themed, fields.inherit] -%}
+
+{{- config | json_encode | raw -}}

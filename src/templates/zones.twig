@@ -1,0 +1,78 @@
+{%- extends "_burton/zones" -%}
+
+{%- block header -%}
+    {%- set zoneHeaderHtml  = parent() | trim -%}
+
+    {%- set wrapperAttr = zoneHeaderHtml | parseAttr -%}
+    {%- set contentAttr = zoneHeaderHtml | retconChange( 'div', false ) | parseAttr -%}
+
+    {%- set align = "left" -%}
+    {%- set align = ( "text-center"  in contentAttr.class ?? [] ) ? "center"  : align -%}
+    {%- set align = ( "text-right"   in contentAttr.class ?? [] ) ? "right"   : align -%}
+    {%- set align = ( "text-justify" in contentAttr.class ?? [] ) ? "justify" : align -%}
+
+    {%- set isCenter = align == "center" -%}
+
+    {%- if align == "justify" -%}
+        {%- set zoneHeaderHtml = zoneHeaderHtml
+            | retconAttr( ".text-justify", { class: contentAttr.class | without("text-justify") } ) -%}
+    {%- endif -%}
+
+    {{- zoneHeaderHtml
+        | attr({ class: [wrapperAttr.data[align] ?? null] })
+        | prepend( block('eyebrow') )
+        | retconAttr( "[data-center]",  { "data-center" : false } )
+        | retconAttr( "[data-left]",    { "data-left"   : false } )
+        | retconAttr( "[data-right]",   { "data-right"  : false } )
+        | retconAttr( "[data-justify]", { "data-justify": false } )
+    -}}
+{%- endblock -%}
+
+
+{%- block zone1 -%}
+    {%- set zone1Html = parent() | trim -%}
+    {%- set zone1Attr = zone1Html | retconChange( 'div', false ) | parseAttr -%}
+    {%- set isCenter = "text-center" in zone1Attr.class ?? [] -%}
+    {{- zone1Html is not empty ?
+        zone1Html | prepend( block('eyebrow') ) -}}
+{%- endblock -%}
+
+
+{%- block eyebrow -%}
+    {%- set icon    = icon    ?? null -%}
+    {%- set eyebrow = eyebrow ?? null -%}
+
+    {%- if icon and eyebrow -%}
+        {{- tag( "div", {
+            class: [
+                "flex items-center mb-1",
+                isCenter ? "justify-center",
+            ],
+            html: svg("@appicons/#{icon}.svg") | attr({
+                class: "fill-theme-link-tint h-6 w-6 -ml-6 mr-1",
+            }) ~ tag( 'span', {
+                html: eyebrow | t,
+                class: "font-extrabold uppercase text-theme-accent-tint text-sm",
+            })
+        }) -}}
+    {%- endif -%}
+
+    {%- if icon and not eyebrow -%}
+        {{- (icon ?? null) ? svg("@appicons/#{icon}.svg") | attr({
+            class: [
+                "fill-theme-link-tint h-10 w-10 mb-2 -mt-10",
+                isCenter ? "mx-auto",
+            ]
+        }) -}}
+    {%- endif -%}
+
+    {%- if eyebrow and not icon -%}
+        {{- (eyebrow ?? null) ? tag( 'span', {
+            html: eyebrow | t,
+            class: [
+                "font-extrabold uppercase text-theme-accent-tint text-sm",
+                isCenter ? "text-center block mx-auto",
+            ],
+        }) -}}
+    {%- endif -%}
+{%- endblock -%}

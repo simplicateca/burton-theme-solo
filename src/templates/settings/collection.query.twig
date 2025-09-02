@@ -1,0 +1,217 @@
+{%- set brands = collect( craft.entries().type('brand').orderBy('title ASC') ) -%}
+
+{%- set common = {
+    brands: {
+        name: "type",
+        type: "select",
+        label: "Event Type",
+        options: { null: "All Brands" } | merge( brands.pluck('title', 'slug') ),
+    },
+
+    limit: {
+        label: "Limit",
+        help: "Set to 0 for no limit",
+        number : { min: 0, max: 100, default: 0, step: 1 }
+    },
+
+    eventTypes: {
+        name: "type",
+        type: "select",
+        label: "Event Type",
+        options: {
+            null: "All Event Types",
+            conference: "Conference",
+            workshop:   "Workshop",
+            livestream: "Liststream",
+        }
+    },
+
+    sort: {
+        label: "Default Sorting",
+        help: "Unless otherwise overridden",
+        select: {
+            default: { "label": "Default", "orderBy": "postDate DESC" },
+            title:   { "label": "Alphabetical", "orderBy": "title ASC" },
+            oldest:  { "label": "Oldest to Newest", "orderBy": "postDate ASC" },
+            recent:  { "label": "Newest to Oldest", "orderBy": "postDate DESC" },
+            popular: { "label": "Popularity", "orderBy": "RAND()" },
+            random:  { "label": "Random", "orderBy": "RAND()" }
+        }
+    },
+
+    sortSimple: {
+        label: "Default Sorting",
+        help: "Unless otherwise overridden",
+        select: {
+            title:   { "label": "Alphabetical", "orderBy": "title ASC" },
+            random:  { "label": "Random", "orderBy": "RAND()" }
+        }
+    },
+
+    before: {
+        label: "On or Before",
+        help: "Exclude newer",
+        type: "date",
+    },
+
+    after: {
+        label: "On or After",
+        help: "Exclude older",
+        type: "date",
+    },
+} -%}
+
+
+{%- set config = {
+
+    public: {
+        label: "Public Facing Content",
+        help: "Articles, Books, Pages, Profiles, Topics, etc.",
+        constants: {
+            with: ["images", "taxonomies"],
+            type: "!= tag",
+            section: ["knowledge", "pages", "taxonomy", "profiles"]
+        },
+        settings: {}
+    },
+
+    articles: {
+        label: "Articles",
+        help : "Articles, Guides, Videos, Podcasts, etc.",
+        constants: {
+            with: ["images", "taxonomies"],
+            type: ["article"]
+        },
+        settings: {
+            articleType: {
+                label: "Article Type",
+                select: {
+                    null: "All Articles",
+                    general: "General Article",
+                    guide: "Learning Guide",
+                    exclusive: "Digital Exclusive",
+                    audio: "Podcast • Audio",
+                    video: "Video Feature"
+                }
+            },
+            limit: common.limit,
+            sort: common.sort,
+            before: common.before,
+            after: common.after,
+        },
+    },
+
+    events: {
+        label: "Events (Upcoming)",
+        constants: {
+            with: ["images", "taxonomies"],
+            element: '\\verbb\\events\\elements\\Event',
+            startDate: ">= #{date('today')|atom}",
+            orderBy: "startDate ASC",
+        },
+        settings: {
+            type: common.eventTypes,
+            brand: common.brands,
+            limit: common.limit,
+        },
+    },
+
+    eventsPast: {
+        label: "Events (Past)",
+        constants: {
+            with: ["images", "taxonomies"],
+            element: '\\verbb\\events\\elements\\Event',
+            startDate: "<= #{date('today')|atom}",
+            orderBy: "startDate DESC",
+        },
+        settings: {
+            type: common.eventTypes,
+            brand: common.brands,
+            limit: common.limit,
+        },
+    },
+
+    books: {
+        label: "Books",
+        constants: {
+            with: ["images", "taxonomies"],
+            type: ["book"]
+        },
+        settings: {
+            limit: common.limit,
+            sort: common.sort,
+            before: common.before,
+            after: common.after,
+        },
+    },
+
+    issues: {
+        label: "Magazine Issues",
+        constants: {
+            with: ["images", "taxonomies"],
+            type: ["issue"]
+        },
+        settings: {
+            limit: common.limit,
+            sort: common.sort,
+            before: common.before,
+            after: common.after,
+        },
+    },
+
+    organizations: {
+        label: "Organizations",
+        constants: {
+            with: ["images", "taxonomies"],
+            type: ["organization"]
+        },
+        settings: {
+            limit: common.limit,
+            sort: common.sortSimple
+        },
+    },
+
+    people: {
+        label: "People",
+        constants: {
+            with: ["images", "taxonomies"],
+            type: ["person"]
+        },
+        settings: {
+            limit: common.limit,
+            sort: common.sortSimple,
+        },
+    },
+
+    stage: {
+        label: "Stage Content",
+        constants: {
+            with: ["images", "taxonomies"],
+            type: ["stage", "interview", "roundtable"]
+        },
+        settings: {
+            limit: common.limit,
+            sort: common.sort,
+            before: common.before,
+            after: common.after,
+        },
+    },
+
+    topics: {
+        label: "Topics",
+        constants: {
+            with: ["images", "taxonomies"],
+            type: ["topic"],
+        },
+        settings: {
+            limit: common.limit,
+            sort: common.sortSimple,
+        },
+    },
+
+} -%}
+
+
+{## Output config options as JSON
+{----------------------------------------------------------------------------#}
+{{- config | json_encode -}}
