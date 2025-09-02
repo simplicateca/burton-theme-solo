@@ -1,3 +1,3 @@
 <?php return [
-    'solotheme loaded' => 'SoloTheme has been successfully loaded!',
+    'burtonsolo loaded' => 'BurtonSolo has been successfully loaded!',
 ];

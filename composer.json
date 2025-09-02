@@ -30,5 +30,8 @@
         "psr-4": {
             "simplicateca\\burtonsolo\\": "src/"
         }
+    },
+    "extra": {
+        "bootstrap": "simplicateca\\burtonsolo\\BurtonSolo"
     }
 }

@@ -5,7 +5,7 @@ namespace simplicateca\burtonsolo;
 use Craft;
 use simplicateca\burton\base\BurtonThemeBase;
 
-class SoloTheme extends BurtonThemeBase
+class BurtonSolo extends BurtonThemeBase
 {
     protected ?string $_consoleNamespace = 'simplicateca\\burtonsolo\\console\\controllers';
 
