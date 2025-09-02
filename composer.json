@@ -13,7 +13,7 @@
     },
     "require": {
         "craftcms/cms": "^5.0.0",
-        "simplicateca/craft-burton-plugin": "dev-develop",
+        "simplicateca/craft-burton-protosite": "dev-develop",
         "openai-php/client": "^0.8.5"
     },
     "autoload": {
