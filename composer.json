@@ -32,6 +32,6 @@
         }
     },
     "extra": {
-        "bootstrap": "simplicateca\\burtonsolo\\BurtonSolo"
+        "class": "simplicateca\\burtonsolo\\BurtonSolo"
     }
 }
