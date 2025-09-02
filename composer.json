@@ -32,6 +32,8 @@
         }
     },
     "extra": {
+        "name": "Burton Solo (Base Theme)",
+        "handle": "burtonsolo",
         "class": "simplicateca\\burtonsolo\\BurtonSolo"
     }
 }
