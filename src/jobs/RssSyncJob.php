@@ -11,7 +11,7 @@ class RssSyncJob extends BaseJob
     {
         Craft::info('Running RSS sync job...', __METHOD__);
 
-        Craft::$app->getModule('burtonsolo')->rssSync->sync();
+        //Craft::$app->getPlugin('burtonsolo')->rssSync->sync();
     }
 
     protected function defaultDescription(): string

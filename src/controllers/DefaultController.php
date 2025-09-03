@@ -49,7 +49,7 @@ class DefaultController extends Controller
 
         ];
 
-        return $this->renderTemplate('_theme/pages/index', $variables );
+        return $this->renderTemplate('_burton/theme/pages/index', $variables );
     }
 
 

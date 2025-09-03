@@ -1,0 +1,159 @@
+{%- extends "_burton/base/card" -%}
+
+{%- block headline -%}
+    {{ parent() | attr({
+        class: ["py-2 px-4 bg-theme-tint2 -mt-4 -ml-4 -mr-4"]
+    }) }}
+{%- endblock -%}
+
+
+{## Card Rendering
+{-------------------------------------------------------------------------------------##}
+{%- macro card__stat( element = null ) -%}
+    {%- if element.statistic ??? null -%}
+        {%- embed ["_burton/theme/card"] with {
+            bit: element,
+            element: CardBase( element ),
+        } | merge( varargs, true ) -%}
+            {%- block headline -%}
+                <div class="flex flex-col items-center justify-center px-4">
+                    {{- ( bit.icon.name ?? null ) ? svg( "@appicons/#{bit.icon.name}.svg" ) | attr({ class: "w-12 h-12 fill-theme-highlight mb-4" }) -}}
+
+                    {{- tag( "div" , {
+                        class: "h1",
+                        html: bit.statistic | replace({
+                            '%': '<sup class="top-0 text-theme-highlight">%</sup>',
+                            '<': '<sup class="top-0 text-theme-highlight">&lt;</sup>',
+                            '>': '<sup class="top-0 text-theme-highlight">&gt;</sup>',
+                            '+': '<sup class="top-0 text-theme-highlight">+</sup>',
+                            '€': '<sup class="top-0 text-theme-highlight">€</sup>',
+                            '$': '<sup class="top-0 text-theme-highlight">$</sup>',
+                            '£': '<sup class="top-0 text-theme-highlight">£</sup>'
+                        })
+                    }) -}}
+
+                    {{ parent() | attr({ class: "h3" }) }}
+                </div>
+            {%- endblock -%}
+
+            {%- block summary -%}
+                {{ parent() | attr({ class: "px-4 text-center" }) }}
+            {%- endblock -%}
+        {%- endembed -%}
+    {%- endif -%}
+
+    {## CSS Source: https://nikitahl.github.io/svg-circle-progress-generator/ ##}
+    {# {%- macro card__statprogress() -%}
+        {% block card__class "w-full relative grid grid-cols-1" -%}
+        {%- block image -%}
+            <div class="flex items-center justify-center">
+                <svg width="200" height="200" viewBox="-25 -25 250 250" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
+                    <circle r="90" cx="100" cy="100" fill="transparent" stroke="#e0e0e0" stroke-width="16px" stroke-dasharray="565.48px" stroke-dashoffset="0"></circle>
+                    <circle r="90" cx="100" cy="100" stroke="#76e5b1" stroke-width="16px" stroke-linecap="round" stroke-dashoffset="57px" fill="transparent" stroke-dasharray="565.48px"></circle>
+                    {%- if content.headline ??? null -%}<text x="55px" y="116px" fill="#6bdba7" font-size="52px" font-weight="bold" style="transform:rotate(90deg) translate(0px, -196px)">{{ content.headline }}</text>{%- endif -%}
+                </svg>
+            </div>
+        {%- endblock %}
+        {% block card__words -%}
+            <div class="text-center">
+                {{- ( content.text ??? content.summary ??? null ) | raw -}}
+            </div>
+            {{- block('action') -}}
+        {%- endblock %}
+    {%- endmacro -%} #}
+
+{%- endmacro -%}
+
+
+
+
+{%- macro card__quote( element = null ) -%}
+    {%- if element.summary ??? null -%}
+        {%- embed ["_burton/theme/card"] with {
+            bit: element,
+            element: CardBase( element ),
+        } | merge( varargs, true ) -%}
+            {%- block figure -%}
+                <div class="-mt-2 w-16 h-16 mb-2 rounded-full overflow-hidden mx-auto">{{ parent() | retconAttr( "img", { class: ["object-cover min-h-16"] }) }}</div>
+            {%- endblock -%}
+
+            {%- block headline -%}
+                <div class="flex flex-col items-center justify-center px-4">
+                    {{- tag( "div" , {
+                        class: "h1",
+                        html: bit.summary | retconOnly("h3") | retconChange( "h3", false ) | replace({
+                            '#1': '<span class="font-extrabold text-theme-highlight">#1</span>',
+                            '#': '<span class="font-extrabold text-theme-highlight">#</span>',
+                            '!': '<span class="font-extrabold text-theme-highlight">!</span>',
+                            '+': '<span class="font-extrabold text-theme-highlight">+</span>',
+                            '&': '<span class="font-extrabold text-theme-highlight">&</span>',
+                            '*': '<span class="font-extrabold text-theme-highlight">*</span>',
+                        })
+                    }) -}}
+                    <h3 class="text-lg font-semibold h3">
+                        {{- bit.label | markdown | retconChange( "p", false ) -}}
+                    </h3>
+                </div>
+            {%- endblock -%}
+
+            {%- block summary -%}
+                {{- parent() | retconRemove("h3") | attr({ class: "px-4 text-center" }) | append( "” – <strong>#{bit.title}</strong>" ) -}}
+            {%- endblock -%}
+        {%- endembed -%}
+    {%- endif -%}
+{%- endmacro -%}
+
+
+{%- macro card__download( element = null ) -%}
+    {%- if element.filename ?? null -%}
+        {%- set icon = "@appicons/file-arrow-down.svg" -%}
+        {%- switch element.kind -%}
+            {%- case 'audio' %}{% set icon = "@appicons/file-audio.svg" %}
+            {%- case 'word'  %}{% set icon = "@appicons/file-doc.svg" %}
+            {%- case 'pdf'   %}{% set icon = "@appicons/file-pdf.svg" %}
+            {%- case 'powerpoint' %}{% set icon = "@appicons/file-ppt.svg" %}
+            {%- case 'excel' %}{% set icon = "@appicons/file-spreadsheet.svg" %}
+            {%- case 'video' %}{% set icon = "@appicons/file-video.svg" %}
+            {%- case 'zip'   %}{% set icon = "@appicons/file-zip.svg" %}
+        {%- endswitch -%}
+
+        <div class="max-w-3xl @container mx-auto flex items-start gap-3 p-4 shadow-sm bg-theme-tint2">
+            <div class="shrink-0 w-12 h-12 text-theme-highlight">
+                {{- svg(icon) -}}
+            </div>
+            <div class="flex-1 @container">
+                <div class="h4">{{ element.details.long ?? element.details.short ?? element.title }}</div>
+
+                {%- set outline = element.outline ?? element.details.outline ?? null -%}
+                {{- outline ? outline | attr({ class: "smaller" }) -}}
+
+                {%- set summary = element.summary ?? element.card.summary ?? null -%}
+                {{ summary ? summary | attr({ class: "smaller line-clamp-3" }) -}}
+
+                {%- set form = craft.formie.forms({ handle: element.form.handle ?? null }).one() %}
+                {%- if form -%}
+                    {% do craft.formie.populateFormValues( form, {
+                        attachment: [element.id],
+                        assetid: element.id,
+                    } ) %}
+                    {%- set form = craft.formie.renderForm( form, { themeConfig: element.form.themeConfig ??? {} } ) -%}
+                {%- endif -%}
+
+                {%- if form is not empty -%}
+                    {{- include( ["_burton/local/modal", "_burton/theme/modal", "_burton/base/modal"], {
+                        content: raw( form ),
+                        button: "Download #{element.kind|upper}"
+                    }, withContext = false ) -}}
+                {%- else -%}
+                    <a href="{{ element.url }}" target="_blank" download="{{element.filename}}" class="button">Download <span>{{ element.kind|upper }}</span></a>
+                {%- endif -%}
+
+                <div class="text-sm pt-2">
+                    {{ element.size|filesize }}
+                    |
+                    Updated {{ element.dateUpdated|date('F j, Y') }}
+                </div>
+            </div>
+        </div>
+    {%- endif -%}
+{%- endmacro -%}

@@ -1,0 +1,448 @@
+{## Format Field Configuration
+{----------------------------------------------------------------------------#}
+{%- set type = element.type.handle ?? null -%}
+
+{## Common Meta Fields
+{----------------------------------------------------------------------------#}
+{%- set common = {
+    limit: {
+        label: "Limit",
+        help: "Set to 0 for no limit",
+        number : { min: 0, max: 100, step: 1 }
+    },
+
+    pagination: {
+        label: "Pagination",
+        help: "Handle multiple pages of results?",
+        select : {
+            basic: "Next / Previous",
+             null: "No Pagination",
+        }
+    },
+
+    alignment: {
+        label: "Force Alignment",
+        help: "",
+        select: {
+            auto:     { label: "Auto-align" },
+            center:   { label: "Center" },
+            left:     { label: "Left" },
+            right:    { label: "Right" },
+            upLeft:   { label: "Up + Left" },
+            upCenter: { label: "Up + Center" },
+            upRight:  { label: "Up + Right" },
+        },
+    },
+
+    multiples: {
+        label: "Multiple Items?",
+        help: "Layout to use if multple items exist",
+        select : {
+            first   : { label: "Use only the first", limit: 1 },
+            random1 : { label: "Choose one at random", limit: 1, orderBy: "RAND()" },
+            carousel: { label: "1-Up Carousel", layout: ["carousel", "_burton/theme/carousel"] },
+        }
+    },
+
+    basicGrid: {
+        label: "Grid Layout",
+        help: "Column/grid output alignment",
+        select : [
+            { value: "auto", label: "Auto Grid" },
+            { value: "auto2", label: "Auto Grid (Min. 2)", minCols: 2 },
+            { value: "auto3", label: "Auto Grid (Min. 3)", minCols: 3 },
+            { value: "flex1", label: "Single Column" },
+            { value: "flex2", label: "2 Columns" },
+            { value: "flex3", label: "3 Columns" },
+            { value: "flex4", label: "4 Columns" },
+            { value: "flex6", label: "6 Columns" },
+        ]
+    },
+
+    basicCard: {
+        label: "Card Style",
+        help: "Design layer wrapped around items",
+        select: {
+            summary  : "Summary",
+            spotlight: "Spotlight",
+            overlay  : "Overlay",
+        }
+    },
+
+    entryClick: {
+        label: "Click Action",
+        help: "What happens when clicked?",
+        select : {
+            link  : "Link to Entry",
+            tease : "Teaser Modal",
+            modal : "Full Content Modal",
+            none  : "No Click Action"
+        }
+    },
+
+    imageClick: {
+        label: "Click Action",
+        help: "What to do when the image is clicked?",
+        select : {
+            auto: "Content Autolink",
+            none: "No Click Action",
+            modal: "Viewer Modal",
+            link: "Link to Asset",
+        }
+    },
+
+    mediaClick: {
+        label: "Click Action",
+        help: "What to do when the media is clicked?",
+        select : {
+            play: "Play in Place",
+            tease : "Teaser Modal",
+            modal: "Player Modal",
+            none: "No Click Action",
+            link: "Link to Asset",
+        }
+    },
+
+    typography: {
+        label: "Typography Style",
+        select : {
+            default: "Default",
+            larger : "Larger",
+            smaller: "Smaller",
+        }
+    },
+
+    knockout: {
+        label: "Knockout",
+        help: "Knockout the zone background from the block theme",
+        select: {
+            none:  "No Knockout",
+            light: "Light Knockout",
+            dark:  "Dark Knockout",
+        }
+    },
+
+    revealText: {
+        label: "Click to Reveal Text",
+        help: "Text to display on the clickable element",
+        text: { default: "Click to reveal" }
+    },
+
+    revealAction: {
+        label: "Reveal Action",
+        help: "What happens when the user clicks to reveal the content?",
+        select : {
+            modal: "Modal Window",
+            toggle: "Foldable Callout",
+            reveal: "Reveal Inline",
+        }
+    }
+} -%}
+
+{%- set fields = {
+    carousel: {
+        label: "Carousel",
+        help: "Arrange cards in a carousel",
+        constants: {
+            layout: ["carousel", "_burton/theme/carousel"],
+        },
+        settings: {
+            alignment: common.alignment,
+            knockout: common.knockout,
+            card:  common.basicCard,
+            click: common.entryClick,
+            columns: {
+                label: "Carousel Columns",
+                help: "Maximum # of columns to display",
+                select : {
+                    max1: "Single Column",
+                    max2: "Two Columns (Max)",
+                    max3: "Three Columns (Max)",
+                }
+            },
+            breakout: {
+                label: "Container Breakout?",
+                help: "Allows unfocused slides outside of content margins",
+                lightswitch : { default: true }
+            }
+        },
+    },
+
+    grid: {
+        label: "Grid",
+        help: "Arrange content cards in a pre-defined grid",
+        constants: {
+            layout: ["grid", "_burton/theme/grid"],
+        },
+        settings: {
+            grid: common.basicGrid,
+            card: common.basicCard,
+            click: common.entryClick,
+            alignment: common.alignment,
+            knockout: common.knockout,
+        }
+    },
+
+    collapser: {
+        label: "Collapsing Panels",
+        help: "Present users with a list of items, each represented by an collapsing panel.",
+        constants: {
+            layout: ["_burton/theme/collapser"],
+        },
+        settings: {
+            alignment: common.alignment,
+            knockout: common.knockout,
+            card: "collapser",
+            firstopen: {
+                label: "Start with first panel open?",
+                lightswitch: { default: "on" }
+            }
+        }
+    }
+} -%}
+
+
+
+{## Prepare Configuration Options
+{----------------------------------------------------------------------------#}
+{%- from "_burton/base/partial" import unpackNestedOptions -%}
+{{- unpackNestedOptions( {
+    bits:      _self.bits( common, fields )      | json_decode,
+    component: _self.component( common, fields ) | json_decode,
+    deck:      _self.deck( common, fields )      | json_decode,
+    fragment:  _self.fragment( common, fields )  | json_decode,
+    image:     _self.image( common, fields )     | json_decode,
+    media:     _self.media( common, fields )     | json_decode,
+    text:      _self.text( common, fields )      | json_decode
+}, type ) | raw -}}
+
+
+{## Individual Config Options By Block Type
+{----------------------------------------------------------------------------#}
+{%- macro component( common, fields ) -%}
+    {%- set config = {
+        default: {
+            label: "Simple",
+            help: "",
+            settings: {
+                alignment: common.alignment,
+                knockout: common.knockout,
+            }
+        },
+    } -%}
+
+    {{- config | json_encode -}}
+{%- endmacro -%}
+
+
+{%- macro bits( common, fields ) -%}
+    {%- set config = {
+        grid: fields.grid,
+        carousel: fields.carousel,
+        collapser: fields.collapser,
+    } -%}
+
+    {{- config | json_encode -}}
+{%- endmacro -%}
+
+
+{%- macro deck( common, fields ) -%}
+    {%- set config = {
+        grid: fields.grid,
+        carousel: fields.carousel,
+        collapser: fields.collapser,
+
+        spotlight: {
+            label: "Spotlight",
+            help: "Prominently feature individual card(s)",
+            constants: {
+                card: 'spotlight',
+                layout: ["grid", "_burton/theme/grid"],
+                grid: 'flex1',
+            },
+            settings: {
+                alignment: common.alignment,
+                knockout: common.knockout,
+                multiples: {
+                    label: "Handling Multiples",
+                    help: "",
+                    select : {
+                        limit: "Limit to One",
+                        fade: "Fade Transition",
+                        tabs: "Tab Navigation",
+                    }
+                },
+            }
+        },
+
+        index: {
+            label: "Entry Index",
+            help: "Allow users to **search**, **sort**, and filter Collection results",
+            docs: {
+                input     : "Search Options & Output Format",
+                inputabove: "These settings allow for **fine tuning the presentation** of the search result and the available __input filters__.",
+                help      : "Understanding the Search Component",
+                helpurl   : "https://www.youtube.com/watch?v=x5bVKZxFdPo",
+            },
+            constants: {
+                layout: ["search", "_burton/theme/search"],
+            },
+            settings: {
+                grid:  common.basicGrid,
+                card:  common.basicCard,
+                click: common.entryClick,
+                pagination: common.pagination,
+                alignment: common.alignment,
+                knockout: common.knockout,
+
+                query: {
+                    label: "Keyword Search",
+                    help: "Allow searching by keyword",
+                    select : {
+                        none: "No keyword search",
+                        above: "Keyword search above results",
+                        below: "Keyword search below results",
+                    }
+                },
+
+                autosearch: {
+                    label: "Automatic Results?",
+                    help: "Show results before requiring any user input or filtering.",
+                    lightswitch : { default: 1 }
+                }
+            }
+        },
+
+
+    } -%}
+
+    {{- config | json_encode -}}
+{%- endmacro -%}
+
+
+{%- macro fragment( common, fields ) -%}
+    {%- set config = {
+        default: {
+            label: "Seamless",
+            help: "Display fragment content seamlessly inline with other blocks",
+            settings: {
+                alignment: common.alignment,
+                knockout: common.knockout,
+            }
+        },
+        interactive: {
+            label: "Interactive",
+            help: "Hide fragment content until triggered by a user action",
+            settings: {
+                alignment: common.alignment,
+                knockout: common.knockout,
+            }
+        },
+        multivariate: {
+            label: "Multivariate",
+            help: "Allow for multiple variations of a block to be displayed",
+            settings: {
+                alignment: common.alignment,
+                knockout: common.knockout,
+            }
+        }
+    } -%}
+
+    {{- config | json_encode -}}
+{%- endmacro -%}
+
+
+{%- macro image( common, fields ) -%}
+    {%- set config = {
+        default: {
+            label: "Basic Image",
+            help: "A simple image field with limited formatting options.",
+            settings: {
+                click: common.imageClick,
+                multiples: common.multiples,
+                alignment: common.alignment,
+                knockout: common.knockout,
+            }
+        },
+        gallery: {
+            label: "Image Gallery",
+            help: "A gallery of images with additional formatting options.",
+            constants: {
+                layout: ["grid", "_burton/theme/grid"],
+            },
+            settings: {
+                click: "lightbox",
+                grid: common.basicGrid,
+                alignment: common.alignment,
+                knockout: common.knockout,
+            }
+        }
+    } -%}
+
+{# {% block json__systemtransforms -%}
+    {%- set transforms = craft.app.getImageTransforms().allTransforms ??? [] -%}
+    {%- if transforms | length -%}
+        {% for t in transforms -%}
+            {%- if loop.first -%}
+                ,{ "optgroup": "System Transforms" }
+            {%- endif -%}
+           ,{ "value": "{{ t.handle }}", "label": "{{ t.name }}", "transform": "{{ t.handle }}" }
+        {%- endfor -%}
+    {%- endif -%}
+{%- endblock %} #}
+
+
+    {{- config | json_encode -}}
+{%- endmacro -%}
+
+
+{%- macro media( common, fields ) -%}
+    {%- set config = {
+        default: {
+            label: "Basic Media",
+            help: "A simple media field with limited formatting options.",
+            settings: {
+                click: common.mediaClick,
+                multiples: common.multiples,
+                player: {
+                    label: "Media Cover",
+                    help: "How to present the media on page load?",
+                    select : {
+                        native: "Default Player",
+                        poster: "Poster Cover"
+                    }
+                },
+            }
+        },
+
+        gallery: {
+            label: "Media Gallery",
+            help: "A gallery of media with additional formatting options.",
+            constants: {
+                layout: ["grid", "_burton/theme/grid"],
+            },
+            settings: {
+                click: "lightbox",
+                grid: common.basicGrid,
+            }
+        }
+    } -%}
+
+    {{- config | json_encode -}}
+{%- endmacro -%}
+
+
+{%- macro text( common, fields ) -%}
+    {%- set config = {
+        default: {
+            label: "Basic Text",
+            help: "Standard text field",
+            settings: {
+                typography: common.typography,
+                knockout: common.knockout,
+            }
+        }
+    } -%}
+
+    {{- config | json_encode -}}
+{%- endmacro -%}

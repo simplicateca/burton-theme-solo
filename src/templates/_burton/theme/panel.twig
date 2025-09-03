@@ -1,0 +1,73 @@
+{## burton/panel
+{-------------------------------------------------------------------------------------##}
+{%- extends "_burton/base/partial" -%}
+
+{%- block output -%}
+    {%- set handle = handle ?? null -%}
+
+    {%- if handle is string -%}
+
+        {%- set params = {
+            trigger: {
+                open : "open-#{handle}",
+                close: "close-#{handle}",
+                body : "has-#{handle}"
+            },
+            panel: {
+                tag: "div",
+                attr: {
+                    class: ["fixed inset-x-0 z-50 overflow-hidden"]
+                }
+            },
+            body: {
+                tag: "div",
+                attr: {
+                    class: ["text-center py-40 px-20 font-bold"]
+                }
+            },
+            overlay: {
+                tag: "div",
+                attr: {
+                    class: ["fixed inset-0 z-20 overflow-hidden", "bg-gray-900 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-50"]
+                },
+            },
+            close: {
+                tag: "div",
+                attr: {
+                    class: ["absolute top-8 right-8"]
+                }
+            }
+        } -%}
+
+        <template
+            x-cloak
+            x-if="open"
+            x-data="{open:false}"
+            x-init="$watch('open', value => ( value ) ? document.body.classList.add('{{params.trigger.body}}') : document.body.classList.remove('{{params.trigger.body}}') )"
+            x-on:{{params.trigger.open }}.window="open = true"
+            x-on:{{params.trigger.close}}.window="open = false"
+        >
+            <div
+                x-transition
+                x-trap.noscroll.inert="open"
+                x-on:click.stop
+                x-on:keydown.escape.prevent.stop="$dispatch('{{params.trigger.close}}'); open=false;"
+                role="dialog"
+                aria-modal="true"
+                data-theme="accent"
+                class="{{ ( params.panel.attr.class ?? [] ) | join(' ') }} canvas"
+            >
+                {% block close %}
+                    {{- tag( params.close.tag ?? 'div', { html: _self.trigger(
+                        svg: { path: "@appicons/xmark.svg" },
+                        dispatch: params.trigger.close
+                    ), ...params.close.attr ?? {} } ) -}}
+                {% endblock %}
+
+                {%- block content -%}
+                    {{- content ? tag( params.body.tag ?? 'div', { html: content, ...params.body.attr ?? {} } ) -}}
+                {%- endblock -%}
+            </div>
+        </template>
+    {%- endif -%}
+{%- endblock -%}

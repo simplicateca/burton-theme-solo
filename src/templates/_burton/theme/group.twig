@@ -1,0 +1,122 @@
+{%- extends "_burton/base/group" -%}
+
+{%- block theme -%}
+    {%- import "_burton" as b -%}
+
+    {%- set output = parent() -%}
+    {%- set theme  = theme ?? 'neutral' -%}
+    {%- set loop   = loop ?? null -%}
+    {%- set group  = collect( group ?? [] ) -%}
+
+    {%- if output is not empty -%}
+        {%- set output   = output | prepend( block('bump') ) -%}
+        {%- set canvas   = group.pluck("settings.canvas")|filter|unique|first -%}
+        {%- set eyecandy = group.pluck("settings.eyecandy")|filter|unique|first -%}
+        {%- set contain  = group.pluck("settings.container")|filter|unique|first -%}
+
+        {%- set backdrop = tag('div', {
+            html : block('canvas') ~ block('eyecandy'),
+            data : { theme: theme },
+            class: [
+                "absolute z-[-1]",
+                ( eyecandy in ["drips","tilt","wave"] ) ? "bottom-8",
+                ( canvas in ["tight", "zone1", "zone2"] ) ? "-inset-8" : "inset-0",
+            ]
+        }) -%}
+
+        {%- if canvas == "tight" -%}
+            {%- set output = output | retconInject( "section *[data-container]:first-child", backdrop ) -%}
+        {%- elseif canvas == "zone1" -%}
+            {%- set output = output
+                | retconAttr( "[data-zone=1]", { class: "relative" } )
+                | retconInject( "[data-zone=1]", backdrop ) -%}
+        {%- elseif canvas == "zone2" -%}
+            {%- set output = output
+                | retconAttr( "[data-zone=1]", { class: "relative" } )
+                | retconInject( "[data-zone=1]", backdrop ) -%}
+        {%- else -%}
+            {%- set output = output | append( backdrop ) -%}
+        {%- endif -%}
+
+        {%- if canvas == "frame" -%}
+            {%- set output = b.container( output, "knockout" ) -%}
+        {%- endif -%}
+
+        {{- output -}}
+    {%- endif -%}
+{%- endblock -%}
+
+
+{%- block bump -%}
+    {%- set attr = ( prevhtml ?? "" ) | retconOnly("*[data-bump]") | parseAttr -%}
+    {%- if attr.data.bump ?? null -%}
+        <div class="bump @container w-full {{attr.data.bump}}">&nbsp;</div>
+    {%- endif -%}
+{%- endblock -%}
+
+
+{%- block canvas -%}
+    {{- tag( "div", {
+        class: [
+            "canvas",
+            eyecandy ?? null == "wave" ? "rounded-t-3xl"
+        ]
+    }) -}}
+{%- endblock -%}
+
+
+{%- block eyecandy -%}
+    {%- set eyecandy = group.pluck("settings.eyecandy")|filter|unique|first -%}
+    {{- eyecandy in ["drips","tilt","wave"] and loop.last ?? false
+        ? null
+        : block("eyecandy__#{eyecandy}") ?? null -}}
+{%- endblock -%}
+
+
+{%- block eyecandy__stars -%}
+    <div class="z-10 absolute inset-0 overflow-hidden fill-gold">
+        <div class="absolute left-0 top-0 w-1/4 -translate-x-1/2" data-speed="0.3" data-parallax="true">
+            {{ svg( "@appicons/star.svg" ) }}
+        </div>
+        <div class="absolute left-1/4 top-96 w-1/12" data-speed="0.9" data-parallax="true">
+            {{ svg( "@appicons/star.svg" ) }}
+        </div>
+
+        <div class="absolute right-0 top-48 w-1/3 translate-x-1/2" data-speed="0.6" data-parallax="true">
+            {{ svg( "@appicons/star.svg" ) }}
+        </div>
+
+        <div class="absolute right-1/4 top-[800px] w-1/5" data-speed="0.2" data-parallax="true">
+            {{ svg( "@appicons/star.svg" ) }}
+        </div>
+    </div>
+
+    {%- js -%}
+        {%- import '_burton/theme/javascript' as javascript -%}
+        {{- javascript.parallax( false ) -}}
+    {%- endjs -%}
+{%- endblock -%}
+
+
+{%- block eyecandy__drips -%}
+    <div data-bump="h-16" class="absolute left-0 right-0 bottom-1 translate-y-full z-10">
+        {{- svg( "@svgroot/paint-drips.svg" ) | attr({
+            class: "w-full h-24 fill-theme" }) -}}
+    </div>
+{%- endblock -%}
+
+
+{%- block eyecandy__tilt -%}
+    <div data-bump="h-16" class="absolute left-0 right-0 bottom-1 translate-y-full z-10">
+        {{- svg( "@svgroot/tilt-ltr.svg" ) | attr({
+            class: "w-full h-24 fill-theme" }) -}}
+    </div>
+{%- endblock -%}
+
+
+{%- block eyecandy__wave -%}
+    <div data-bump="h-16" class="absolute left-0 right-0 bottom-1 translate-y-full z-10">
+        {{- svg( "@svgroot/wave.svg" ) | attr({
+            class: "w-full h-24 fill-theme" }) -}}
+    </div>
+{%- endblock -%}

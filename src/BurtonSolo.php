@@ -23,10 +23,6 @@ class BurtonSolo extends BurtonThemeBase
         \simplicateca\burtonsolo\twigextensions\ToolboxTwig::class,
     ];
 
-    protected array $_siteTemplatePath = [
-        '_theme' => __DIR__ . DIRECTORY_SEPARATOR . 'templates',
-    ];
-
     protected array $_translations = [
         'burtonsolo' => [
             'class' => \craft\i18n\PhpMessageSource::class,

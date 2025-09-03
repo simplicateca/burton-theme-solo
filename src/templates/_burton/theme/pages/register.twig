@@ -1,0 +1,603 @@
+{## Registration Page Functionality
+{---------------------------------------------------------------------------------------}
+    Handles requests for the root registration page at `/register`, and also any valid
+    steps (i.e. /register/tickets, /register/badges, etc). Requests arrive here via:
+
+ 1. EntryType+Slug routing for `register` page via `templates/_burton/local/section.pages`
+ 2. Advanced URL routing of steps for `register/*` via `config/routes.php`
+
+ -> https://craftcms.com/docs/5.x/system/routing.html#advanced-routing-with-url-rules
+{-------------------------------------------------------------------------------------##}
+{%- set entry   = entry ??? craft.entries.section('pages').slug('register').one() ??? null %}
+{%- set action  = actionSlug ??? 'choose' %}
+{%- set actions = ['choose', 'account', 'badges', 'method', 'payment'] %}
+
+
+
+
+{## Template Override ➜ Page Top
+{---------------------------------------------------------------------------------------}
+    - Allows headerBuilder on the index page
+    - Creates a customer page header for all other actions
+    - Ignores `topbar__minimal` option
+    - Replace Primary Menu with Checkout Step Menu and
+    - Removes the Breadcrumb navigation
+{-------------------------------------------------------------------------------------##}
+{% block page__top %}
+    {% embed "_burton/local/header" with {
+        blocks: action == 'choose' ? blocks ??? [] : [],
+        title : _self.action_headline( action ),
+        menu  : _self.action_navigation( action ),
+     } %}
+        {% block primary         menu %}
+        {% block plaintitle      title ?? parent() -%}
+        {% block breadcrumb      "" -%}
+        {# {% block masthead__open  raw( block('topbar') ~ block('opentag') ) -%} #}
+    {% endembed %}
+{% endblock %}
+
+
+{## Template Override ➜ Page Bottom
+{---------------------------------------------------------------------------------------}
+    - Slim Footer
+{-------------------------------------------------------------------------------------##}
+{% block page__bottom block( 'footer__slim', '_burton/local/footer' ) -%}
+
+
+
+{#######################################################################################}
+
+
+
+{## Main Content
+{---------------------------------------------------------------------------------------}
+    Route to the proper {% block %} based on the current action/step
+{-------------------------------------------------------------------------------------##}
+{%- block content -%}
+    {%- set actionContent = block("content__#{action}") -%}
+    {{- actionContent ? raw( actionContent ) -}}
+{%- endblock -%}
+
+
+
+{## Event Selection
+{---------------------------------------------------------------------------------------}
+    /register
+{-------------------------------------------------------------------------------------##}
+{% block content__choose %}
+    {%- import "_burton" as b -%}
+    {%- import "_burton/local/conference" as conference -%}
+
+    {{ _self.order_summary({
+        headline    : "Registration in Progress…",
+        theme       : "light",
+        actiontitle : "Next Step...",
+        actionbutton: "Save and Review Badges →"|t,
+    })}}
+
+    {%- set confQuery = craft.events.events().type('conference').limit(-1) -%}
+    {% for conf in confQuery %}
+        <div class="px-4 py-20 canvas bg-theme" data-theme="{{ loop.index is divisible by(2) ? 'light' : 'neutral' }}">
+            <div class="max-w-6xl mx-auto w-full">
+                <div class="w-full @container max-w-5xl">
+                    <h2>{{ conf.title }}</h2>
+                </div>
+
+                <div class="w-full flex gap-20 mb-8">
+                    <div class="grow flex flex-col gap-6">
+                        {{ conference.detail_icons( conf, {} ) }}
+
+                        {{ conference.register_buttons( conf, {
+                            buttontext: "Choose Your Seats →",
+                            detailtext: "Full Event Details",
+                        } ) }}
+
+                        {% if conf.sessions.one() -%}
+                            {# <div class="w-full @container">
+                                <h3>{{ "Featured Speakers"|t }}</h3> #}
+                                {{ conference.speaker_list( conf, {} ) }}
+                            {# </div> #}
+                        {% endif %}
+                    </div>
+
+                    <div class="w-80 max-w-80 min-w-80 self-end">
+                        {{ conference.city_thumbnail( conf, { divclass: 'w-full' } ) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}
+
+
+
+{## Account Creation or Login
+{---------------------------------------------------------------------------------------}
+    /register/account
+{-------------------------------------------------------------------------------------##}
+{% block content__account %}
+    {%- import "_burton" as b -%}
+    {%- import "_burton/local/forms" as forms -%}
+
+    {%- set cart = cart ??? craft.commerce.carts.cart %}
+    {% if not ( cart.lineItems ??? null ) -%}
+        {% redirect siteUrl('register') -%}
+    {% endif %}
+
+    {%- set currentUser = currentUser ??? null %}
+
+    {%- set cartEmail = craft.commerce.carts.cart.email
+        ??? craft.app.user.getRememberedUsername()
+        ??? null %}
+
+    {%- set couldLogin = not currentUser
+                        and cartEmail
+                        and craft.users.email(cartEmail).status('active').count() -%}
+
+    {% if couldLogin %}
+        <div class="max-w-xl mx-auto @container px-4" data-theme="light">
+            <div class="p-8 bg-theme w-full">
+                {# {{ b.text( "Option ①"|t, format: "eyebrow__basic" ) }} #}
+                <h2 class="h3">Use Your Existing Account</h2>
+                <p>Checkout faster with stored payment information & addresses.</p>
+
+                {{ forms.form_login({
+                    redirect    : siteUrl('register/account'),
+                    username    : cartEmail,
+                    errorCode   : errorCode    ??? null,
+                    errorMessage: errorMessage ??? null,
+                }) }}
+            </div>
+        </div>
+    {% endif %}
+
+    <form method="post" accept-charset="utf-8" x-data="{}">
+        {{ csrfInput() }}
+        {{ actionInput('commerce/cart/update-cart') }}
+        {{ redirectInput( siteUrl('register/badges') ) }}
+
+        <div class="max-w-xl mx-auto @container px-4 mb-16" data-theme="light">
+            <div class="p-8 bg-theme w-full">
+                {% if couldLogin %}
+                    {%- import "_burton" as b -%}
+                    {# {{ b.text( "Option ②"|t, "eyebrow__basic" ) }} #}
+                    <h2 class="h3">Continue as Guest</h2>
+                    <p>Tickets and order history will still be accessible from your account dashboard, but you <strong>won't have access to</strong> stored payment methods or addresses without logging in.</p>
+                {% else %}
+                    <h2 class="h3">Your Information</h2>
+                {% endif %}
+
+                <div class="flex flex-col gap-3">
+                    {{ forms.signup_fields() }}
+                </div>
+            </div>
+        </div>
+
+        {{ _self.order_summary({
+            actiontitle : "Next Step...",
+            actionbutton: "Save and Review Badges →"|t,
+        })}}
+    </form>
+
+{% endblock %}
+
+
+
+{## Badge Assignment
+{---------------------------------------------------------------------------------------}
+    /register/badges
+{-------------------------------------------------------------------------------------##}
+{% block content__badges %}
+    {%- import "_burton" as b -%}
+    {%- import "_burton/local/forms" as forms -%}
+    {%- import "_burton/local/conference" as conference -%}
+
+    {%- set cart    = cart ??? craft.commerce.carts.cart ??? null %}
+    {%- set badges  = collect( cart.lineItems ??? [] ).whereNotNull( 'snapshot.eventId' ) -%}
+
+    {%- set event   = craft.events.events().id(badges|first.snapshot.eventId).one() -%}
+    {%- set label   = event.label ??? 'Badge' %}
+
+    {%- set tickets = collect( craft.events.tickets().event(event) ) -%}
+
+    <form method="post" accept-charset="utf-8" x-data="{}">
+        {{ csrfInput() }}
+        {{ actionInput('commerce/cart/update-cart') }}
+        {{ redirectInput( siteUrl('register/method') ) }}
+
+        <div class="max-w-7xl mx-auto @container px-4 mb-16"  data-theme="light">
+            {% for ticketType in badges.all() -%}
+                <div class="flex gap-10 flex-wrap justify-center">
+                    {% for i in 1.. ticketType.qty %}
+                        {%- set first = ( loop.first and loop.parent.loop.first ) -%}
+                        {%- set badge = ( ticketType.options.badges ??? null )
+                            ? ticketType.options.badges[i] ??? null
+                            : null %}
+
+                        {%- set badge = badge ??? {
+                            fullName    : first ? cart.billingAddress.fullName ??? null,
+                            email       : first ? cart.email : '@' ~ cart.email|split('@')[1],
+                            organization: cart.billingAddress.organization ??? null,
+                            city        : cart.billingAddress.locality ??? null,
+                            position    : null,
+                        } %}
+
+                        <div class="w-full max-w-96 @container">
+                            <div class="h3">{{ticketType.snapshot.title}} Badge #{{i}}</div>
+
+                            <div class="p-4 bg-white">
+                                <div class="field flex gap-4 mb-3 items-center text-right">
+                                    <label class="grow whitespace-nowrap text-sm 2xl:text-base">Full Name <strong>*</strong></label>
+                                    <input type="text" name="lineItems[{{ticketType.id}}][options][badges][{{i}}][fullName]" required class="p-2 bg-slate-100" value="{{badge.fullName}}">
+                                </div>
+
+                                <div class="field flex gap-4 mb-3 items-center text-right">
+                                    <label class="grow whitespace-nowrap text-sm 2xl:text-base">Email <strong>*</strong></label>
+                                    <input type="email" name="lineItems[{{ticketType.id}}][options][badges][{{i}}][email]" placeholder="name@example.com" required class="p-2 bg-slate-100" value="{{badge.email}}">
+                                </div>
+
+                                <div class="field flex gap-4 mb-3 items-center text-right">
+                                    <label class="grow whitespace-nowrap text-sm 2xl:text-base">Position <strong>*</strong></label>
+                                    <input type="text" name="lineItems[{{ticketType.id}}][options][badges][{{i}}][position]" class="p-2 bg-slate-100" value="{{badge.position}}">
+                                </div>
+
+                                <div class="field flex gap-4 mb-3 items-center text-right">
+                                    <label class="grow whitespace-nowrap text-sm 2xl:text-base">Company</label>
+                                    <input type="text" name="lineItems[{{ticketType.id}}][options][badges][{{i}}][organization]" class="p-2 bg-slate-100" value="{{badge.organization}}">
+                                </div>
+
+                                {%- set ticket = tickets.firstWhere('typeId', ticketType.snapshot.typeId ) ??? null %}
+                                {{ conference.badge_form( ticket, {
+                                    input : "lineItems[#{ticketType.id}][options][badges][#{i}]",
+                                    values: badge,
+                                } ) }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+
+        {{ _self.order_summary({
+            actiontitle : "Next Step...",
+            actionbutton: "Save + Select Payment Method →"|t,
+        })}}
+    </form>
+{% endblock %}
+
+
+
+{## Choose Payment Method
+{---------------------------------------------------------------------------------------}
+    /register/method
+{-------------------------------------------------------------------------------------##}
+{% block content__method %}
+    {%- import "_burton" as b -%}
+    {%- import "_burton/local/forms" as forms -%}
+
+    <form method="post" accept-charset="utf-8">
+        {{ csrfInput() }}
+        {{ actionInput('commerce/cart/update-cart') }}
+        {{ redirectInput(siteUrl('register/payment')) }}
+
+        <div class="max-w-lg mx-auto @container px-4 mb-16" data-theme="light">
+            <div class="p-8 bg-theme-tint">
+                {{ forms.payment_methods() }}
+            </div>
+
+            {% if craft.app.config.general.devMode %}
+                <div class="p-8 bg-theme-tint mt-8">
+                    {{ forms.currencies() }}
+                </div>
+            {% endif %}
+        </div>
+
+        {{ _self.order_summary({
+            actiontitle : "Next Step...",
+            actionbutton: "Save + Final Review →"|t,
+        })}}
+    </form>
+{% endblock %}
+
+
+
+{## Payment Form
+{---------------------------------------------------------------------------------------}
+    /register/payment
+{-------------------------------------------------------------------------------------##}
+{% block content__payment %}
+    {%- import "_burton" as b -%}
+
+    {%- set cart = cart ??? craft.commerce.carts.cart ??? null -%}
+    {%- set user = ( cart.email ??? null )
+        ? craft.users.email(cart.email).one()
+        : null -%}
+
+    {%- set session = craft.app.session %}
+    {% do session.set( 'cartemail', cart.email ) -%}
+
+    {%- set gateway = cart.gateway %}
+    {% if not gateway %}
+        {% redirect siteUrl('register/method') -%}
+    {% endif %}
+
+    {%- set payOffline = gateway.handle in ['purchaseOrder', 'cheque'] %}
+    {%- set formID     = payOffline ? "complete"      : "payment" -%}
+    {%- set formAction = payOffline ? "cart/complete" : "payments/pay" -%}
+
+    <form id="{{formID}}Form" method="post" accept-charset="utf-8"
+        x-data="{ processing: false }"
+        x-on:submit.prevent="if (processing) return false; processing = true;"
+    >
+        {{ csrfInput() }}
+        {{ actionInput("commerce/#{formAction}") }}
+        {{ redirectInput(siteUrl('account/history', {
+            number: cart.number,
+            success: 'true'
+        })) }}
+
+        {{ hiddenInput('orderEmail', cart.email) }}
+
+        {{ ( not user or not user.getIsCredentialed() ) ?
+            hiddenInput('registerUserOnOrderComplete', 1) }}
+
+        <div class="max-w-2xl mx-auto @container px-4 mb-16" data-theme="light">
+            <div class="p-8 bg-theme-tint">
+                {% if cart.gatewayId or cart.paymentSourceId %}
+
+                    {% if paymentForm is defined %}
+                        {% for key, errors in paymentForm.getErrors() -%}
+                            {% for error in errors %}
+                                {% if loop.first %}<ul>{% endif %}
+                                    <li class="text-red-600"><strong>{{ key }}</strong> {{ error }}</li>
+                                {% if loop.last %}</ul>{% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if cart.gatewayId %}
+                        {{ hiddenInput('gatewayId', cart.gatewayId) }}
+                        {%- set params = {} %}
+
+                        {% if className(cart.gateway) == 'craft\\commerce\\paypalcheckout\\gateways\\Gateway' %}
+                            {%- set params = { currency: cart.paymentCurrency } %}
+                        {% endif %}
+
+                        <div class="gateway-payment-form relative pb-16">
+                            {% namespace cart.gateway.handle|commercePaymentFormNamespace %}
+                                {{ cart.gateway.getPaymentFormHtml(params)
+                                    | retconAttr( 'button', { class: 'stripe-payment-elements-submit-button button w-full button_gold absolute bottom-0' }  )
+                                    | raw }}
+                            {% endnamespace %}
+
+                            {% if cart.gateway.supportsPaymentSources() -%}
+                                <label class="mt-4 cursor-pointer block">
+                                    {{ tag( 'input', {
+                                        type: 'checkbox',
+                                        name: 'savePaymentSource',
+                                        value: 1,
+                                    })}}
+                                    <span>Save card for future purchases</span>
+                                </label>
+                            {% endif %}
+
+                            {% if 'dummy' == cart.gateway.handle %}
+                                <button class='button w-full button_gold'>Complete Payment</button>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        Confirmation Form HTML
+                        {{ cart.gateway.getPaymentConfirmationFormHtml({})|raw }}
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        {{ _self.order_summary({
+            actiontitle : "Order Summary",
+            actionbutton: null,
+        })}}
+    </form>
+{% endblock %}
+
+
+{#######################################################################################}
+
+
+
+{## Header Elements
+{---------------------------------------------------------------------------------------}
+    These should be refactored
+{-------------------------------------------------------------------------------------##}
+{%- macro action_headline( action ) -%}
+
+    {%- set eyebrow = "Registration"|t %}
+    {%- set eyebrow = action == "account" ? "Step Two"|t : eyebrow %}
+    {%- set eyebrow = action == "badges"  ? "Step Three"|t : eyebrow %}
+    {%- set eyebrow = action == "method"  ? "Step Four"|t : eyebrow %}
+    {%- set eyebrow = action == "payment" ? "Last Step"|t : eyebrow %}
+
+    {%- set title = "Choose Your Event"|t %}
+    {%- set title = action == "account"  ? "Account Contact"|t : title %}
+    {%- set title = action == "badges"   ? "Badge Review"|t   : title %}
+    {%- set title = action == "method"   ? "Payment Method"|t  : title %}
+    {%- set title = action == "payment"  ? "Checkout"|t : title %}
+
+    {%- import "_burton" as b -%}
+
+    <div class="max-w-5xl mx-auto @container" data-headercopy>
+        {# {{ b.text( eyebrow, "eyebrow__centerbasic" ) }} #}
+        {{ tag( 'h1', {
+            html : title,
+            class: 'text-center',
+        } ) }}
+    </div>
+{%- endmacro -%}
+
+
+{%- macro action_navigation( action ) -%}
+    {%- set action = action ??? 'choose' -%}
+    <nav class="pb-4">
+        <ol class="flex items-center justify-between gap-x-10">
+            {{ _self.action_step( { num: 1, label: 'Tickets'|t, name: ['choose'  ], url: siteUrl( '/register' ) }, action ) }}
+            {{ _self.action_step( { num: 2, label: 'Contact'|t, name: ['account' ], url: siteUrl( '/register/account' ) }, action ) }}
+            {{ _self.action_step( { num: 3, label: 'Review'|t,  name: ['badges'  ], url: siteUrl( '/register/badges' )  }, action ) }}
+            {{ _self.action_step( { num: 4, label: 'Payment'|t, name: ['payment','method' ], url: siteUrl( '/register/method' ) }, action ) }}
+        </ol>
+    </nav>
+{%- endmacro -%}
+
+
+{%- macro action_step( step, action ) -%}
+    {%- set slugs  = step.name ??? ['choose'] %}
+    {%- set action = action ??? 'choose' %}
+
+    {%- set active = ( action in slugs ) -%}
+    {%- set number = tag('span', {
+        class: 'flex items-center justify-center w-8 h-8 bg-theme-highlight rounded-full',
+        html : step.num ??? null }) -%}
+
+    {%- set label = tag('strong', {
+        class: 'ml-4 text-lg font-medium whitespace-nowrap',
+        html : step.label ??? null }) -%}
+
+    {%- set span = tag('span', {
+        class: 'flex items-center text-theme-accent',
+        html : number ~ label }) -%}
+
+    {%- set link = tag('a', {
+        href : step.url,
+        class: 'flex items-center ' ~ ( active ? 'text-theme-hightlight' : 'text-theme-accent' ),
+        html : number ~ label }) -%}
+
+    <li class="group">{{ raw( link ) }}</li>
+{%- endmacro -%}
+
+
+{%- macro order_summary( settings ) -%}
+    {%- import "_burton" as b -%}
+    {%- import "_burton/local/conference" as conference -%}
+
+    {%- set settings = settings ??? { theme: 'neutral' } %}
+    {%- set settings = {
+        headline: null,
+        theme   : 'neutral',
+        class   : 'canvas py-16 px-4',
+    } | merge( settings ) -%}
+
+    {%- set cart = craft.commerce.carts.cart ??? null -%}
+
+    {%- set badges  = collect( cart.lineItems ??? [] ).whereNotNull( 'snapshot.eventId' ) -%}
+    {%- set eventId = badges|length ? badges|first.snapshot.eventId ??? null : '00000' %}
+    {%- set event   = craft.events.events().id(eventId).one() ??? null -%}
+
+    {% if event %}
+        <section data-theme="{{ settings.theme }}" class="{{ settings.class }} @container">
+
+            {% if settings.headline %}
+                <div class="max-w-6xl mx-auto">
+                    <div class="w-full @container max-w-5xl">
+                        <h2>{{ settings.headline }}</h2>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="flex flex-col @3xl:mx-auto w-full max-w-2xl @3xl:max-w-6xl @3xl:flex-row-reverse gap-8 @4xl:gap-16">
+                <div class="min-w-72">
+                    <h3 class="text-4xl mb-4">{{ settings.actiontitle }}</h3>
+                    {% if settings.actionbutton %}
+                        <button class="button button_gold w-full">{{ settings.actionbutton }}</button>
+                    {% endif %}
+
+                    <div class="mt-8">
+                        <div class="border-t-2 border-theme-tint2 text-gray-600">
+                            <div class="flex gap-4 leading-tight relative border-b-2 border-theme-tint2 py-2 px-1 opacity-80 hover:opacity-100 hover:bg-white">
+                                <div class="text-left">
+                                    <div class="uppercase font-bold text-sm">Tickets</div>
+                                    <a href="{{siteUrl('register')}}" class="text-sm click-cover underline text-theme-link">Update quanity</a>
+                                </div>
+
+                                <div class="flex-grow text-right flex flex-col gap-1">
+                                    {% for type in badges %}
+                                        <p>
+                                            <strong class="font-semibold">{{ type.snapshot.title }} Badge</strong> x{{type.qty}}<br>
+                                            {{ type.priceAsCurrency }}
+                                        </p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            {% if cart.billingAddress.fullName ??? null %}
+                                <div class="flex gap-4 leading-tight relative border-b-2 border-theme-tint2 py-2 px-1 hover:bg-white">
+                                    <div class="text-left">
+                                        <div class="uppercase font-bold text-sm">Contact</div>
+                                        <a href="{{siteUrl('register/account')}}" class="text-sm click-cover underline">Change info</a>
+                                    </div>
+
+                                    <div class="flex-grow text-right">
+                                        <p>
+                                            <strong class="font-semibold">{{ cart.billingAddress.fullName }}</strong><br>
+                                            {{ cart.email }}
+                                        </p>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <div class="flex gap-4 leading-tight relative border-b-2 border-theme-tint2 py-2 px-1 hover:bg-white">
+                                <div class="text-left">
+                                    <div class="uppercase font-bold text-sm">Badges</div>
+                                    <a href="{{siteUrl('register/badges')}}" class="text-sm click-cover underline">Reassign</a>
+                                </div>
+
+                                <div class="flex-grow text-right">
+                                    <p>
+                                        3 of 3<br>
+                                        complete
+                                    </p>
+                                </div>
+                            </div>
+
+                            {% if cart.paymentSource ??? cart.gateway ??? null %}
+                                <div class="flex gap-4 leading-tight relative border-b-2 border-theme-tint2 py-2 px-1 hover:bg-white">
+                                    <div class="text-left">
+                                        <div class="uppercase font-bold text-sm">Payment</div>
+                                        <a href="{{siteUrl('register/method')}}" class="text-sm click-cover underline">Change method</a>
+                                    </div>
+
+                                    <div class="flex-grow text-right">
+                                        <p>
+                                            <strong class="font-semibold">{{ cart.paymentSource ??? cart.gateway }}</strong><br>
+                                            <span class="text-xs pr-0.5">{{ cart.currency }}</span>{{ cart.totalAsCurrency }}
+                                        </p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-grow w-full">
+                    {% if event %}
+                        <h3 class="text-4xl mb-4">{{ event.title }}</h3>
+                        <div class="p-6 bg-theme-tint2">
+                            <div class="flex gap-6 items-center">
+                                {{ conference.city_thumbnail( event, {
+                                    divclass: 'max-w-28',
+                                    autolink: event.url,
+                                } ) }}
+                                <div class="@container w-full">
+                                    {{ conference.detail_icons( event, { } ) }}
+                                </div>
+                            </div>
+
+                            <div class="mt-6">
+                                {{ conference.speaker_list( event, {} ) }}
+                            </div>
+                        </div>
+                        <a href="{{siteUrl('register#event')}}" class="block font-semibold text-center text-theme-accent text-sm p-2 bg-theme-accent/20 hover:bg-theme-accent hover:text-theme-accent-alt">Change Event</a>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+{%- endmacro -%}
