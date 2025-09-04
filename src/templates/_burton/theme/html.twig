@@ -13,7 +13,6 @@
     {%- from _self import prefetch -%}
     {{- prefetch([
         'https://unpkg.com',
-        'https://cdn.polyfill.io',
         'https://cdn.jsdelivr.net',
         'https://fonts.googleapis.com',
         'https://fonts.gstatic.com',
@@ -34,15 +33,11 @@
             background-color: #f5f5f5;
         }
 
-        {%- set scheme = scheme ?? null -%}
-        {{ _self.theme__colors( scheme ) -}}
-        {{ _self.theme__light( scheme )   -}}
-        {{ _self.theme__dark( scheme )    -}}
-        {{ _self.theme__accent( scheme )  -}}
+        {{- block( 'css__colors' ) -}}
     {% endcss %}
 {%- endblock -%}
 
-{% block head__fonts %}
+{# {% block head__fonts %}
     {%- from _self import fontface -%}
     <style>
         {{ fontface( 'Lato', 'Lato-Light',    300 ) }}
@@ -51,7 +46,7 @@
         {{ fontface( 'Lato', 'Lato-Semibold', 600 ) }}
         {{ fontface( 'Lato', 'Lato-Black',    900 ) }}
     </style>
-{% endblock %}
+{% endblock %} #}
 
 {% block head__js %}
     {%- import '_burton/theme/javascript' as javascript -%}
@@ -294,21 +289,13 @@
 
 
 
-
-
 {## Theme Colours
 {---------------------------------------------------------------------------##}
-{%- macro theme__colors(scheme) -%}
+{%- block css__colors -%}
     :root {
         --white: 255 255 255;
         --black: 255 255 255;
-
-        --corpo-blue-300: 15 49 64;
-        --corpo-blue-500: 26 85 112;
-        --corpo-blue-700: 19 61 80;
-        --corpo-blue-900: 11 37 48;
-
-        --corpo-gold: 236 166 33;
+        --amber: 255 210 46;
 
         --blue-50 : 239 246 255;
         --blue-100: 219 234 254;
@@ -352,12 +339,15 @@
         --headings        : var(--neutral-800);
         --headings-alt    : var(--white);
         --body            : var(--neutral-900);
-        {{ _self.neutral__text( scheme ) }}
+
+        --highlight       : var(--blue-500);
+        --link            : var(--blue-800);
+        --link-tint       : var(--amber);
+        --accent          : var(--blue-300);
+        --accent-tint     : var(--blue-800);
+        --accent-alt      : var(--white);
     }
-{%- endmacro -%}
 
-
-{%- macro theme__light( scheme ) %}
     *[data-theme="light"] {
         --background      : var(--white);
         --background-tint : var(--neutral-200);
@@ -367,108 +357,45 @@
         --headings-alt    : var(--white);
         --body            : var(--neutral-900);
 
-        {{ _self.neutral__text( scheme ) }}
+        --highlight       : var(--blue-500);
+        --link            : var(--blue-800);
+        --link-tint       : var(--amber);
+        --accent          : var(--blue-300);
+        --accent-tint     : var(--blue-800);
+        --accent-alt      : var(--white);
     }
-{%- endmacro -%}
 
-
-{%- macro theme__dark( scheme ) %}
     *[data-theme="dark"] {
-        --background      : var(--corpo-blue-300);
-        --background-tint : var(--corpo-blue-900);
-        --background-tint2: var(--corpo-blue-700);
+        --background      : var(--blue-300);
+        --background-tint : var(--blue-900);
+        --background-tint2: var(--blue-700);
 
         --headings        : var(--neutral-300);
-        --headings-alt    : var(--corpo-blue-300);
+        --headings-alt    : var(--blue-300);
         --body            : var(--neutral-200);
 
-        {{ _self.dark__text( scheme ) }}
+        --highlight       : var(--blue-500);
+        --link            : var(--sky-500);
+        --link-tint       : var(--amber);
+        --accent          : var(--sky-800);
+        --accent-tint     : var(--sky-300);
+        --accent-alt      : var(--sky-200);
     }
-{%- endmacro -%}
 
-
-{%- macro theme__accent( scheme ) %}
     *[data-theme="accent"] {
-        --background      : var(--corpo-blue-300);
-        --background-tint : var(--corpo-blue-900);
-        --background-tint2: var(--corpo-blue-700);
+        --background      : var(--blue-300);
+        --background-tint : var(--blue-900);
+        --background-tint2: var(--blue-700);
 
         --headings        : var(--neutral-300);
-        --headings-alt    : var(--corpo-blue-300);
+        --headings-alt    : var(--blue-300);
         --body            : var(--neutral-200);
 
-        {{ _self.dark__text( scheme ) }}
+        --highlight       : var(--blue-500);
+        --link            : var(--sky-500);
+        --link-tint       : var(--amber);
+        --accent          : var(--sky-800);
+        --accent-tint     : var(--sky-300);
+        --accent-alt      : var(--sky-200);
     }
-{%- endmacro -%}
-
-
-{## Foreground Text
-{---------------------------------------------------------------------------##}
-{%- macro neutral__text( scheme ) -%}
-    {%- set scheme = scheme ?? "base" -%}
-    {% switch scheme %}
-        {% case "lw" %}
-            --highlight       : 85 55 117;   /**  553775  |  purple-300   **/
-            --link            : 101 75 153;  /**  654b99  |  purple-800   **/
-            --link-tint       : var(--corpo-gold);
-            --accent          : var(--corpo-blue-300);
-            --accent-tint     : var(--blue-800);
-            --accent-alt      : var(--white);
-        {% case "ls" %}
-            --highlight       : 47 79 138;   /**  2F4F8A  |  blue-300     **/
-            --link            : 57 96 168;   /**  3960A8  |  blue-800     **/
-            --link-tint       : var(--corpo-gold);
-            --accent          : var(--corpo-blue-300);
-            --accent-tint     : var(--blue-800);
-            --accent-alt      : var(--white);
-        {% case "fl" %}
-            --highlight       : 37 117 97;   /**  257561  |  green-300    **/
-            --link            : 50 157 130;  /**  329D82  |  green-800    **/
-            --link-tint       : var(--corpo-gold);
-            --accent          : var(--corpo-blue-300);
-            --accent-tint     : var(--blue-800);
-            --accent-alt      : var(--white);
-        {% default %}
-            --highlight       : var(--corpo-blue-500);
-            --link            : var(--blue-800);
-            --link-tint       : var(--corpo-gold);
-            --accent          : var(--corpo-blue-300);
-            --accent-tint     : var(--blue-800);
-            --accent-alt      : var(--white);
-    {% endswitch %}
-{%- endmacro -%}
-
-
-{%- macro dark__text( scheme ) -%}
-    {%- set scheme = scheme ?? "base" -%}
-    {%- switch scheme -%}
-        {%- case "lw" -%}
-            --highlight       : 72 29 109;   /**  481d6d  |  purple-600   **/
-            --link            : 167 139 250; /**  a78bfa  |  purple-400   **/
-            --link-tint       : var(--corpo-gold);
-            --accent          : 85 55 117;   /**  553775  |  purple-300   **/
-            --accent-tint     : 167 139 250; /**  a78bfa  |  purple-400   **/
-            --accent-alt      : 38 38 38;    /**  262626  |  white        **/
-        {%- case "ls" -%}
-            --highlight       : 36 90 184;   /**  245AB8  |  blue-600     **/
-            --link            : 133 167 230; /**  85A7E6  |  blue-400     **/
-            --link-tint       : var(--corpo-gold);
-            --accent          : 47 79 138;   /**  2F4F8A  |  blue-300     **/
-            --accent-tint     : 133 167 230; /**  85A7E6  |  blue-400     **/
-            --accent-alt      : 38 38 38;    /**  262626  |  white        **/
-        {%- case "fl" -%}
-            --highlight       : 0 179 133;   /**  00B385  |  green-600     **/
-            --link            : 85 193 165;  /**  55C1A5  |  green-400     **/
-            --link-tint       : var(--corpo-gold);
-            --accent          : 37 117 97;   /**  257561  |  green-300     **/
-            --accent-tint     : 85 193 165;  /**  55C1A5  |  green-400     **/
-            --accent-alt      : 38 38 38;    /**  262626  |  white         **/
-        {%- default -%}
-            --highlight       : var(--corpo-blue-500);
-            --link            : var(--sky-500);
-            --link-tint       : var(--corpo-gold);
-            --accent          : var(--sky-800);
-            --accent-tint     : var(--sky-300);
-            --accent-alt      : var(--sky-200);
-    {%- endswitch -%}
-{%- endmacro -%}
+{%- endblock -%}

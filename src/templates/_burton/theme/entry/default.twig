@@ -1,8 +1,9 @@
-{%- extends "_burton/base/entry" -%}
+{## Theme Default Entry ➜ _burton/theme/entry/default.twig -------------------}
+{##--------------------------------------------------------------------------#}
+{%- extends "_burton/base/entry/default" -%}
 
 {%- block body__id    "entry-#{entry.id ?? null}" -%}
 {%- block body__class "#{parent()} entry entry--#{entry.type.handle ?? null}" -%}
-
 
 {## <time> Tag
 {-------------------------------------------------------------------------------------##}
@@ -19,12 +20,6 @@
 {-------------------------------------------------------------------------------------##}
 {%- macro readtime( content ) -%}
     <span>5 min</span>
-{%- endmacro -%}
-
-
-{%- macro outline( entry ) -%}
-    {%- import "_burton" as b -%}
-    {{- entry.outline ? b.text( entry.outline, 'outline', separator: 'none' ) -}}
 {%- endmacro -%}
 
 
@@ -65,7 +60,7 @@
     </div>
 
     {%- js -%}
-        {% import '_burton/theme/javascript' as javascript %}
+        {% import '_theme/javascript' as javascript %}
         {{- javascript.copyToClipboard() -}}
     {%- endjs -%}
 {%- endmacro -%}
