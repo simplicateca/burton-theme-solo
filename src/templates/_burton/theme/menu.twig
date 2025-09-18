@@ -14,7 +14,8 @@
         menu: handle,
     } | merge( varargs, true ) -%}
 
-    {{- nodes ? _self.renderMenu( nodes|unshift(trigger), ...params ) -}}
+    {# {{- nodes ? _self.renderMenu( nodes|unshift(trigger), ...params ) -}} #}
+    {{- nodes ? _self.renderMenu( nodes, ...params ) -}}
 {%- endmacro -%}
 
 
@@ -22,6 +23,7 @@
 {%- macro menu__primary( handle ) -%}
     {%- set handle  = 'primary' -%}
     {%- set nodes   = craft.navigation.nodes().handle(handle).level(1).all() ?? null -%}
+
     {%- set trigger = _self.trigger(
         svg: { path: "@appicons/bars.svg" },
         dispatch: 'open-megamenu',
@@ -31,7 +33,8 @@
         menu: handle,
     } | merge( varargs, true ) -%}
 
-    {{- nodes ? _self.renderMenu( nodes|unshift(trigger), ...params ) -}}
+    {# {{- nodes ? _self.renderMenu( nodes|unshift(trigger), ...params ) -}} #}
+    {{- nodes ? _self.renderMenu( nodes, ...params ) -}}
 {%- endmacro -%}
 
 
@@ -60,7 +63,7 @@
             },
 
             link: {
-                attr: { class: "whitespace-nowrap text-theme-link underline-offset-1 hover:underline hover:text-theme-link-tint" },
+                attr: { class: "whitespace-nowrap text-theme-link underline-offset-1 hover:underline hover:text-theme-link-hover" },
                 node: {
                     attr: {
                         class: "flex flex-col items-center p-0"
@@ -100,7 +103,7 @@
                 }
             },
             link   : {
-                attr: { class: "flex flex-col text-theme-link hover:text-theme-link-tint hover:underline" },
+                attr: { class: "flex flex-col text-theme-link hover:text-theme-link-hover hover:underline" },
                 node: {
                     attr: {
                         class: "list-disc"
@@ -115,7 +118,7 @@
             },
             link   : {
                 attr: {
-                    class: "no-underline underline-offset-2 @sm:whitespace-nowrap text-theme-link hover:text-theme-link-tint hover:underline"
+                    class: "no-underline underline-offset-2 @sm:whitespace-nowrap text-theme-link hover:text-theme-link-hover hover:underline"
                 },
                 node: {
                     attr: { class: "flex flex-col p-0" }
@@ -153,7 +156,7 @@
                             py-2
                             text-sm
                             text-theme-link
-                            hover:text-theme-link-tint
+                            hover:text-theme-link-hover
                         "
                         ><span class="w-4 text-center">{{lang.language|upper|slice(0,2) }}</span></a>
                     </li>
@@ -189,7 +192,7 @@
                         html : "<span>#{node.title}</span>"
                     }) }}
                 {% else %}
-                    {%- set link = 'bg-theme-tint p-2 block w-full no-underline hover:bg-theme-accent hover:text-theme-accent-alt' %}
+                    {%- set link = 'bg-theme-surface p-2 block w-full no-underline hover:bg-theme-accent hover:text-theme-accent-surface' %}
                     {{ tag( 'a', {
                         href : node.url ??? null,
                         class: node.active ? "#{link} is-active" : link,
@@ -204,7 +207,7 @@
                 {% if node.children.one() -%}
                     {% for child in node.children.all() -%}
                         <li class="{{ block('itemClass') }}">
-                            {%- set link = 'bg-theme-tint p-2 block w-full no-underline hover:bg-theme-accent hover:text-theme-accent-alt' %}
+                            {%- set link = 'bg-theme-surface p-2 block w-full no-underline hover:bg-theme-accent hover:text-theme-accent-surface' %}
                             {{ tag( 'a', {
                                 href : child.url ??? null,
                                 class: child.active ? "#{link} is-active" : link,
@@ -296,7 +299,7 @@
                         text-theme-link
                         underline-offset-2
                         hover:underline
-                        hover:text-theme-link-tint
+                        hover:text-theme-link-hover
                     {% endblock %}
                 {% endembed %} #}
 

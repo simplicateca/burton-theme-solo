@@ -25,12 +25,12 @@
         help: "",
         select: {
             auto:     { label: "Auto-align" },
-            center:   { label: "Center" },
-            left:     { label: "Left" },
-            right:    { label: "Right" },
-            upLeft:   { label: "Up + Left" },
-            upCenter: { label: "Up + Center" },
-            upRight:  { label: "Up + Right" },
+            top :     { label: "Up",   zonesuffix: "top" },
+            left:     { label: "Left", containersuffix: "left" },
+            right:    { label: "Right", containersuffix: "right" },
+            upLeft:   { label: "Up + Left",   zonesuffix: "top", containersuffix: "left" },
+            upCenter: { label: "Up + Center", zonesuffix: "top" },
+            upRight:  { label: "Up + Right",  zonesuffix: "top", containersuffix: "right" },
         },
     },
 
@@ -187,7 +187,7 @@
         label: "Collapsing Panels",
         help: "Present users with a list of items, each represented by an collapsing panel.",
         constants: {
-            layout: ["_burton/theme/collapser"],
+            layout: ["collapser", "_burton/theme/collapser"],
         },
         settings: {
             alignment: common.alignment,
@@ -439,6 +439,7 @@
             help: "Standard text field",
             settings: {
                 typography: common.typography,
+                alignment: common.alignment,
                 knockout: common.knockout,
             }
         }

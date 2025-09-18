@@ -2,7 +2,7 @@
 
 {%- block headline -%}
     {{ parent() | attr({
-        class: ["py-2 px-4 bg-theme-tint2 -mt-4 -ml-4 -mr-4"]
+        class: ["py-2 px-4 bg-theme-surface -mt-4 -ml-4 -mr-4"]
     }) }}
 {%- endblock -%}
 
@@ -17,18 +17,18 @@
         } | merge( varargs, true ) -%}
             {%- block headline -%}
                 <div class="flex flex-col items-center justify-center px-4">
-                    {{- ( bit.icon.name ?? null ) ? svg( "@appicons/#{bit.icon.name}.svg" ) | attr({ class: "w-12 h-12 fill-theme-highlight mb-4" }) -}}
+                    {{- ( bit.icon.name ?? null ) ? svg( "@appicons/#{bit.icon.name}.svg" ) | attr({ class: "w-12 h-12 fill-theme-accent mb-4" }) -}}
 
                     {{- tag( "div" , {
                         class: "h1",
                         html: bit.statistic | replace({
-                            '%': '<sup class="top-0 text-theme-highlight">%</sup>',
-                            '<': '<sup class="top-0 text-theme-highlight">&lt;</sup>',
-                            '>': '<sup class="top-0 text-theme-highlight">&gt;</sup>',
-                            '+': '<sup class="top-0 text-theme-highlight">+</sup>',
-                            '€': '<sup class="top-0 text-theme-highlight">€</sup>',
-                            '$': '<sup class="top-0 text-theme-highlight">$</sup>',
-                            '£': '<sup class="top-0 text-theme-highlight">£</sup>'
+                            '%': '<sup class="top-0 text-theme-accent">%</sup>',
+                            '<': '<sup class="top-0 text-theme-accent">&lt;</sup>',
+                            '>': '<sup class="top-0 text-theme-accent">&gt;</sup>',
+                            '+': '<sup class="top-0 text-theme-accent">+</sup>',
+                            '€': '<sup class="top-0 text-theme-accent">€</sup>',
+                            '$': '<sup class="top-0 text-theme-accent">$</sup>',
+                            '£': '<sup class="top-0 text-theme-accent">£</sup>'
                         })
                     }) -}}
 
@@ -82,12 +82,12 @@
                     {{- tag( "div" , {
                         class: "h1",
                         html: bit.summary | retconOnly("h3") | retconChange( "h3", false ) | replace({
-                            '#1': '<span class="font-extrabold text-theme-highlight">#1</span>',
-                            '#': '<span class="font-extrabold text-theme-highlight">#</span>',
-                            '!': '<span class="font-extrabold text-theme-highlight">!</span>',
-                            '+': '<span class="font-extrabold text-theme-highlight">+</span>',
-                            '&': '<span class="font-extrabold text-theme-highlight">&</span>',
-                            '*': '<span class="font-extrabold text-theme-highlight">*</span>',
+                            '#1': '<span class="font-extrabold text-theme-accent">#1</span>',
+                            '#': '<span class="font-extrabold text-theme-accent">#</span>',
+                            '!': '<span class="font-extrabold text-theme-accent">!</span>',
+                            '+': '<span class="font-extrabold text-theme-accent">+</span>',
+                            '&': '<span class="font-extrabold text-theme-accent">&</span>',
+                            '*': '<span class="font-extrabold text-theme-accent">*</span>',
                         })
                     }) -}}
                     <h3 class="text-lg font-semibold h3">
@@ -117,8 +117,8 @@
             {%- case 'zip'   %}{% set icon = "@appicons/file-zip.svg" %}
         {%- endswitch -%}
 
-        <div class="max-w-3xl @container mx-auto flex items-start gap-3 p-4 shadow-sm bg-theme-tint2">
-            <div class="shrink-0 w-12 h-12 text-theme-highlight">
+        <div class="max-w-3xl @container mx-auto flex items-start gap-3 p-4 shadow-sm bg-theme-surface">
+            <div class="shrink-0 w-12 h-12 text-theme-accent">
                 {{- svg(icon) -}}
             </div>
             <div class="flex-1 @container">

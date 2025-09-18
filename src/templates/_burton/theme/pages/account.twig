@@ -50,7 +50,7 @@
         {% if currentUser %}
             {# {{- b.builder( entry, 'sidebar' ) -}} #}
         {% else %}
-            <div class="bg-theme-tint p-4 sm:p-8 sticky top-20">
+            <div class="bg-theme-surface p-4 sm:p-8 sticky top-20">
                 <h2 class="h3">Already have an account?</h2>
                 {{ block('content__login') }}
             </div>
@@ -109,7 +109,7 @@
         {{ commerce.order_transactions( order, {} ) }}
 
         <h3>Actions</h3>
-        <div class="p-10 bg-theme-tint">
+        <div class="p-10 bg-theme-surface">
             {{ commerce.order_actions( order, {} ) }}
         </div>
     {% endif %}

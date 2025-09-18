@@ -281,12 +281,12 @@
         {{ redirectInput(siteUrl('register/payment')) }}
 
         <div class="max-w-lg mx-auto @container px-4 mb-16" data-theme="light">
-            <div class="p-8 bg-theme-tint">
+            <div class="p-8 bg-theme-surface">
                 {{ forms.payment_methods() }}
             </div>
 
             {% if craft.app.config.general.devMode %}
-                <div class="p-8 bg-theme-tint mt-8">
+                <div class="p-8 bg-theme-surface mt-8">
                     {{ forms.currencies() }}
                 </div>
             {% endif %}
@@ -342,7 +342,7 @@
             hiddenInput('registerUserOnOrderComplete', 1) }}
 
         <div class="max-w-2xl mx-auto @container px-4 mb-16" data-theme="light">
-            <div class="p-8 bg-theme-tint">
+            <div class="p-8 bg-theme-surface">
                 {% if cart.gatewayId or cart.paymentSourceId %}
 
                     {% if paymentForm is defined %}
@@ -454,7 +454,7 @@
 
     {%- set active = ( action in slugs ) -%}
     {%- set number = tag('span', {
-        class: 'flex items-center justify-center w-8 h-8 bg-theme-highlight rounded-full',
+        class: 'flex items-center justify-center w-8 h-8 bg-theme-accent rounded-full',
         html : step.num ??? null }) -%}
 
     {%- set label = tag('strong', {
@@ -510,8 +510,8 @@
                     {% endif %}
 
                     <div class="mt-8">
-                        <div class="border-t-2 border-theme-tint2 text-gray-600">
-                            <div class="flex gap-4 leading-tight relative border-b-2 border-theme-tint2 py-2 px-1 opacity-80 hover:opacity-100 hover:bg-white">
+                        <div class="border-t-2 border-theme-surface2 text-gray-600">
+                            <div class="flex gap-4 leading-tight relative border-b-2 border-theme-surface2 py-2 px-1 opacity-80 hover:opacity-100 hover:bg-white">
                                 <div class="text-left">
                                     <div class="uppercase font-bold text-sm">Tickets</div>
                                     <a href="{{siteUrl('register')}}" class="text-sm click-cover underline text-theme-link">Update quanity</a>
@@ -528,7 +528,7 @@
                             </div>
 
                             {% if cart.billingAddress.fullName ??? null %}
-                                <div class="flex gap-4 leading-tight relative border-b-2 border-theme-tint2 py-2 px-1 hover:bg-white">
+                                <div class="flex gap-4 leading-tight relative border-b-2 border-theme-surface2 py-2 px-1 hover:bg-white">
                                     <div class="text-left">
                                         <div class="uppercase font-bold text-sm">Contact</div>
                                         <a href="{{siteUrl('register/account')}}" class="text-sm click-cover underline">Change info</a>
@@ -543,7 +543,7 @@
                                 </div>
                             {% endif %}
 
-                            <div class="flex gap-4 leading-tight relative border-b-2 border-theme-tint2 py-2 px-1 hover:bg-white">
+                            <div class="flex gap-4 leading-tight relative border-b-2 border-theme-surface2 py-2 px-1 hover:bg-white">
                                 <div class="text-left">
                                     <div class="uppercase font-bold text-sm">Badges</div>
                                     <a href="{{siteUrl('register/badges')}}" class="text-sm click-cover underline">Reassign</a>
@@ -558,7 +558,7 @@
                             </div>
 
                             {% if cart.paymentSource ??? cart.gateway ??? null %}
-                                <div class="flex gap-4 leading-tight relative border-b-2 border-theme-tint2 py-2 px-1 hover:bg-white">
+                                <div class="flex gap-4 leading-tight relative border-b-2 border-theme-surface2 py-2 px-1 hover:bg-white">
                                     <div class="text-left">
                                         <div class="uppercase font-bold text-sm">Payment</div>
                                         <a href="{{siteUrl('register/method')}}" class="text-sm click-cover underline">Change method</a>
@@ -579,7 +579,7 @@
                 <div class="flex-grow w-full">
                     {% if event %}
                         <h3 class="text-4xl mb-4">{{ event.title }}</h3>
-                        <div class="p-6 bg-theme-tint2">
+                        <div class="p-6 bg-theme-surface">
                             <div class="flex gap-6 items-center">
                                 {{ conference.city_thumbnail( event, {
                                     divclass: 'max-w-28',
@@ -594,7 +594,7 @@
                                 {{ conference.speaker_list( event, {} ) }}
                             </div>
                         </div>
-                        <a href="{{siteUrl('register#event')}}" class="block font-semibold text-center text-theme-accent text-sm p-2 bg-theme-accent/20 hover:bg-theme-accent hover:text-theme-accent-alt">Change Event</a>
+                        <a href="{{siteUrl('register#event')}}" class="block font-semibold text-center text-theme-accent text-sm p-2 bg-theme-accent/20 hover:bg-theme-accent hover:text-theme-accent-surface">Change Event</a>
                     {% endif %}
                 </div>
             </div>

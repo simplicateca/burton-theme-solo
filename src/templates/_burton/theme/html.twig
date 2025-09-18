@@ -233,7 +233,7 @@
 {%- block footer__upper -%}
     <div data-builder='footer' class="flex flex-col lg:flex-row-reverse gap-20 py-16">
         {%- block footer__cta -%}
-            <div class="w-full @container lg:max-w-1/2 bg-theme-tint rounded-br-[10rem] -mt-28" x-data>
+            <div class="w-full @container lg:max-w-1/2 bg-theme-surface rounded-br-[10rem] -mt-28" x-data>
                 <div class="w-full h-full flex justify-center items-center relative">
                     <a x-on:click.prevent="" href="#" class="h4 p-10 !mb-0 click-cover">Call to Action</a>
                 </div>
@@ -255,7 +255,7 @@
             {%- import "_burton" as b -%}
             {{- b.menu( 'legal' ) | retconAttr( 'a',  { class: ["text-base"] }) -}}
         </div>
-        <div class="@lg:whitespace-nowrap text-white">© 1970-{{ "now"|date("Y") }} The Art of Productions Inc. All&nbsp;rights reserved.</div>
+        <div class="@lg:whitespace-nowrap text-white">© 1970-{{ "now"|date("Y") }} Company Name. All&nbsp;rights reserved.</div>
     </div>
 {%- endblock -%}
 

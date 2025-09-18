@@ -49,10 +49,10 @@
                 isCenter ? "justify-center",
             ],
             html: svg("@appicons/#{icon}.svg") | attr({
-                class: "fill-theme-link-tint h-6 w-6 -ml-6 mr-1",
+                class: "fill-theme-link-hover h-6 w-6 -ml-6 mr-1",
             }) ~ tag( 'span', {
                 html: eyebrow | t,
-                class: "font-extrabold uppercase text-theme-accent-tint text-sm",
+                class: "font-extrabold uppercase text-theme-accent-surface text-sm",
             })
         }) -}}
     {%- endif -%}
@@ -60,7 +60,7 @@
     {%- if icon and not eyebrow -%}
         {{- (icon ?? null) ? svg("@appicons/#{icon}.svg") | attr({
             class: [
-                "fill-theme-link-tint h-10 w-10 mb-2 -mt-10",
+                "fill-theme-link-hover h-10 w-10 mb-2 -mt-10",
                 isCenter ? "mx-auto",
             ]
         }) -}}
@@ -70,7 +70,7 @@
         {{- (eyebrow ?? null) ? tag( 'span', {
             html: eyebrow | t,
             class: [
-                "font-extrabold uppercase text-theme-accent-tint text-sm",
+                "font-extrabold uppercase text-theme-accent-surface text-sm",
                 isCenter ? "text-center block mx-auto",
             ],
         }) -}}

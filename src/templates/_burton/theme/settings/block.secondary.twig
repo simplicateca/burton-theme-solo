@@ -42,8 +42,10 @@
         help: "Width and positioning of content rows",
         select: {
             "rows-66|100" : "66% / 100%",
+            "rows-66|100-left" : "66% / 100% (Left)",
             "rows-100|100": "100% / 100%",
             "rows-66|66"  : "66% / 66%",
+            "rows-66|66-left"  : "66% / 66% (Left)"
         }
     },
 
@@ -52,7 +54,9 @@
         help: "Width and positioning of content rows",
         select: {
             "rowsrev-100|66": "100% / 66%",
-            "rowsrev-66|66" : "66% / 66%"
+            "rowsrev-100|66-left": "100% / 66% (Left)",
+            "rowsrev-66|66" : "66% / 66%",
+            "rowsrev-66|66-left" : "66% / 66% (Left)"
         }
     },
 
@@ -103,7 +107,7 @@
         label: "Nothing",
         help: "No secondary content for this element",
         constants: {
-            zonelayout: "rows-66|100",
+            zonelayout: "rows-66|100-left",
         },
     },
 
