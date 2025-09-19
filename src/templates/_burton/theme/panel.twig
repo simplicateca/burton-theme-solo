@@ -2,43 +2,48 @@
 {-------------------------------------------------------------------------------------##}
 {%- extends "_burton/base/partial" -%}
 
+{%- set handle = handle ?? null -%}
+
+{%- set params = {
+    trigger: {
+        open : "open-#{handle}",
+        close: "close-#{handle}",
+        body : "has-#{handle}"
+    },
+    panel: {
+        tag: "div",
+        attr: {
+            class: ["fixed inset-x-0 z-50 overflow-hidden"]
+        }
+    },
+    body: {
+        tag: "div",
+        attr: {
+            class: ["text-center py-40 px-20 font-bold"]
+        }
+    },
+    overlay: {
+        tag: "div",
+        attr: {
+            class: ["fixed inset-0 z-20 overflow-hidden", "bg-gray-900 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-50"]
+        },
+    },
+    close: {
+        tag: "div",
+        attr: {
+            class: ["absolute top-8 right-8"]
+        }
+    }
+} | merge({
+    trigger : ( trigger ?? null ) is iterable ? trigger : {},
+    panel   : ( panel ?? null ) is iterable ? panel : {},
+    body    : ( body ?? null ) is iterable ? body : {},
+    overlay : ( overlay ?? null ) is iterable ? overlay : {},
+    close   : ( close ?? null ) is iterable ? close : {},
+}, true ) -%}
+
 {%- block output -%}
-    {%- set handle = handle ?? null -%}
-
-    {%- if handle is string -%}
-
-        {%- set params = {
-            trigger: {
-                open : "open-#{handle}",
-                close: "close-#{handle}",
-                body : "has-#{handle}"
-            },
-            panel: {
-                tag: "div",
-                attr: {
-                    class: ["fixed inset-x-0 z-50 overflow-hidden"]
-                }
-            },
-            body: {
-                tag: "div",
-                attr: {
-                    class: ["text-center py-40 px-20 font-bold"]
-                }
-            },
-            overlay: {
-                tag: "div",
-                attr: {
-                    class: ["fixed inset-0 z-20 overflow-hidden", "bg-gray-900 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-50"]
-                },
-            },
-            close: {
-                tag: "div",
-                attr: {
-                    class: ["absolute top-8 right-8"]
-                }
-            }
-        } -%}
-
+    {%- if content -%}
         <template
             x-cloak
             x-if="open"
@@ -54,8 +59,8 @@
                 x-on:keydown.escape.prevent.stop="$dispatch('{{params.trigger.close}}'); open=false;"
                 role="dialog"
                 aria-modal="true"
-                data-theme="accent"
-                class="{{ ( params.panel.attr.class ?? [] ) | join(' ') }} canvas"
+                data-theme="{{ params.panel.attr.data.theme ?? 'light' }}"
+                class="{{ ( params.panel.attr.class ?? [] ) | join(' ') }} canvas @container"
             >
                 {% block close %}
                     {{- tag( params.close.tag ?? 'div', { html: _self.trigger(

@@ -27,14 +27,15 @@
     {%- set trigger = _self.trigger(
         svg: { path: "@appicons/bars.svg" },
         dispatch: 'open-megamenu',
-    ) | trim -%}
+    ) | attr({
+        class: "hidden"
+    })  -%}
 
     {%- set params = {
         menu: handle,
     } | merge( varargs, true ) -%}
 
-    {# {{- nodes ? _self.renderMenu( nodes|unshift(trigger), ...params ) -}} #}
-    {{- nodes ? _self.renderMenu( nodes, ...params ) -}}
+    {{- nodes ? _self.renderMenu( nodes|unshift(trigger), ...params ) -}}
 {%- endmacro -%}
 
 
@@ -77,12 +78,12 @@
                 aria: { label: "Primary Navigation" }
             }},
             list: {
-                attr: { class: "m-0 p-0 list-none flex items-center gap-8" }
+                attr: { class: "m-0 p-0 list-none flex items-center gap-4 @4xl:gap-8" }
             },
             link: {
                 node: {
                     attr: {
-                        class: "flex flex-col items-center px-1.5 text-lg font-semibold"
+                        class: "flex flex-col items-center px-1.5 text-base @4xl:text-lg font-semibold"
                     }
                 }
             }
