@@ -1,8 +1,6 @@
 {%- extends "_burton/base/group" -%}
 
 {%- block theme -%}
-    {%- import "_burton" as b -%}
-
     {%- set output = parent() -%}
     {%- set theme  = theme ?? 'neutral' -%}
     {%- set loop   = loop ?? null -%}
@@ -39,6 +37,7 @@
         {%- endif -%}
 
         {%- if canvas == "frame" -%}
+            {%- import "_burton" as b -%}
             {%- set output = b.container( output, "knockout" ) -%}
         {%- endif -%}
 
