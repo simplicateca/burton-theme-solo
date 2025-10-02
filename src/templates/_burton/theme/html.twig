@@ -7,7 +7,13 @@
     <html>, <head>, and <body> settings
 {-------------------------------------------------------------------------------------##}
 {%- block html__class "no-js opacity-100 visible scroll-smooth" -%}
-{%- block body__class "font-body text-theme-body m-0 p-0 min-h-screen h-full bg-gray-100" -%}
+{%- block body__class "font-body text-theme-body m-0 p-0 min-h-screen h-full bg-gray-400" -%}
+
+{%- block page -%}
+    <div style="max-width: 2200px;" class="min-h-screen h-full bg-gray-100 relative mx-auto shadow-lg">
+        {{- parent() -}}
+    </div>
+{%- endblock -%}
 
 {%- block head__meta -%}
     {%- from _self import prefetch -%}
@@ -33,11 +39,11 @@
             background-color: #f5f5f5;
         }
 
-        {{- block( 'css__colors' ) -}}
+        {{- block( 'css__colors', router.path ?? _self) -}}
     {% endcss %}
 {%- endblock -%}
 
-{# {% block head__fonts %}
+{% block head__fonts %}
     {%- from _self import fontface -%}
     <style>
         {{ fontface( 'Lato', 'Lato-Light',    300 ) }}
@@ -46,11 +52,10 @@
         {{ fontface( 'Lato', 'Lato-Semibold', 600 ) }}
         {{ fontface( 'Lato', 'Lato-Black',    900 ) }}
     </style>
-{% endblock %} #}
+{% endblock %}
 
 {% block head__js %}
     {%- import '_burton/theme/javascript' as javascript -%}
-    {# {{- javascript.polyfillio() -}} #}
     {{- javascript.vite() -}}
     {{- javascript.htmx_cdn() -}}
     {{- javascript.alpine_cdn() -}}
@@ -70,14 +75,14 @@
         {%- import "_burton" as b -%}
         {{- tag( 'section', {
             id: 'masthead',
-            html: b.container( block('interface'), 'fluid' ),
+            html: b.container( block('interface', router.path ?? _self), 'fluid' ),
             data: { theme: 'accent' },
             class: 'relative z-10 canvas',
         }) -}}
 
         {{ include( "_burton/theme/panel", {
             handle: 'megamenu',
-            content: block('megamenu')
+            content: block('megamenu', router.path ?? _self)
         }, withContext = false ) }}
     {%- endblock -%}
 
@@ -88,14 +93,14 @@
         {%- set hBuilder = b.builder( entry, "header" ) -%}
         {%- set hTheme   = hBuilder|parseAttr.data.theme ?? null -%}
         {%- set hasTitle = hBuilder|retconOnly('h1') -%}
-        {%- set crumbs   = block('breadcrumb') -%}
+        {%- set crumbs   = block('breadcrumb', router.path ?? _self) -%}
 
         {{- hasTitle is empty ? hBuilder -}}
 
         {{- tag( "header", {
             id  : "header",
             role: "banner",
-            html: hasTitle ? hBuilder : block('h1'),
+            html: hasTitle ? hBuilder : block('h1', router.path ?? _self),
             data: { theme: hasTitle ? hTheme : "neutral" },
             class: [ hasTitle ? "canvas" ],
         }) | prepend( hTheme not in ['light'] ? tag( "div", { html: crumbs, class: "absolute w-full" } ) )
@@ -136,7 +141,7 @@
 {%- block interface -%}
     <div class="flex py-4">
         <div class="absolute translate-y-8 2xs:translate-y-4 xs:translate-y-2 3sm:translate-y-0 xs:relative">
-            {{- block('logo') -}}
+            {{- block('logo', router.path ?? _self) -}}
         </div>
         <div class="flex flex-col w-full justify-between items-end">
             {%- block navigation -%}
@@ -162,12 +167,12 @@
 
     {## Two Column Layout (with <aside>)
     {---------------------------------------------------------------------------------##}
-    {%- set sidebarContent = block('aside') | trim -%}
+    {%- set sidebarContent = block('aside', router.path ?? _self) | trim -%}
     {%- if sidebar ?? sidebarContent is not empty -%}
         {%- import "_burton" as b -%}
         {%- set sidebar = sidebar ?? 'right' -%}
         {{- b.zonelayout( {
-            zone1 : block('content'),
+            zone1 : block('content', router.path ?? _self),
             zone2 : sidebarContent,
         }, "aside_#{sidebar}" | camel ) -}}
 
@@ -204,17 +209,17 @@
         role : 'contentinfo',
         class: 'relative z-20 canvas',
         data : { theme: 'accent' },
-        html : block('footer')
+        html : block('footer', router.path ?? _self)
     }) -}}
 {% endblock %}
 
 
 {% block footer %}
     {%- import "_burton" as b -%}
-    {{- b.container( block('footer__upper'), 'fluid' ) -}}
+    {{- b.container( block('footer__upper', router.path ?? _self), 'fluid' ) -}}
 
     <div class="bg-black py-2">
-        {{- b.container( block('footer__lower'), 'fluid' ) -}}
+        {{- b.container( block('footer__lower', router.path ?? _self), 'fluid' ) -}}
     </div>
 {% endblock %}
 
@@ -231,7 +236,7 @@
 
 
 {%- block footer__upper -%}
-    <div data-builder='footer' class="flex flex-col lg:flex-row-reverse gap-20 py-16">
+    <div class="flex flex-col lg:flex-row-reverse gap-20 py-16">
         {%- block footer__cta -%}
             <div class="w-full @container lg:max-w-1/2 bg-theme-surface rounded-br-[10rem] -mt-28" x-data>
                 <div class="w-full h-full flex justify-center items-center relative">

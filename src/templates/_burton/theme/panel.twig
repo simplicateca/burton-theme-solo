@@ -13,19 +13,20 @@
     panel: {
         tag: "div",
         attr: {
-            class: ["fixed inset-x-0 z-50 overflow-hidden"]
+            class: ["fixed inset-0 z-50 overflow-hidden"]
         }
     },
     body: {
         tag: "div",
         attr: {
-            class: ["text-center py-40 px-20 font-bold"]
+            data: { theme: "light" },
+            class: ["w-full h-full justify-center items-center flex p-5"]
         }
     },
-    overlay: {
+    inner: {
         tag: "div",
         attr: {
-            class: ["fixed inset-0 z-20 overflow-hidden", "bg-gray-900 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-50"]
+            class: ["max-w-3xl w-full"]
         },
     },
     close: {
@@ -38,7 +39,7 @@
     trigger : ( trigger ?? null ) is iterable ? trigger : {},
     panel   : ( panel ?? null ) is iterable ? panel : {},
     body    : ( body ?? null ) is iterable ? body : {},
-    overlay : ( overlay ?? null ) is iterable ? overlay : {},
+    inner   : ( inner ?? null ) is iterable ? inner : {},
     close   : ( close ?? null ) is iterable ? close : {},
 }, true ) -%}
 
@@ -62,17 +63,27 @@
                 data-theme="{{ params.panel.attr.data.theme ?? 'light' }}"
                 class="{{ ( params.panel.attr.class ?? [] ) | join(' ') }} canvas @container"
             >
-                {% block close %}
-                    {{- tag( params.close.tag ?? 'div', { html: _self.trigger(
-                        svg: { path: "@appicons/xmark.svg" },
-                        dispatch: params.trigger.close
-                    ), ...params.close.attr ?? {} } ) -}}
-                {% endblock %}
-
-                {%- block content -%}
-                    {{- content ? tag( params.body.tag ?? 'div', { html: content, ...params.body.attr ?? {} } ) -}}
-                {%- endblock -%}
+                {{- block("close", router.path ?? _self) -}}
+                {{- block("body",  router.path ?? _self) -}}
             </div>
         </template>
     {%- endif -%}
 {%- endblock -%}
+
+{%- block body -%}
+    {{- tag( params.body.tag ?? 'div', {
+        html: block("inner", router.path ?? _self),
+    ...params.body.attr ?? {} } ) -}}
+{%- endblock -%}
+
+{%- block inner -%}
+    {{- tag( params.inner.tag ?? 'div', {
+        html: content, ...params.inner.attr ?? {} } ) -}}
+{%- endblock -%}
+
+{% block close %}
+    {{- tag( params.close.tag ?? 'div', { html: _self.trigger(
+        svg: { path: "@appicons/xmark.svg" },
+        dispatch: params.trigger.close
+    ), ...params.close.attr ?? {} } ) -}}
+{% endblock %}

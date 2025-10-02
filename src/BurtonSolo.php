@@ -11,7 +11,6 @@ class BurtonSolo extends BurtonThemeBase
 
     protected array $_listeners = [
         \simplicateca\burtonsolo\helpers\OpenAiHelper::class,
-        \simplicateca\burtonsolo\helpers\HtmlFieldHelper::class,
     ];
 
     protected array $_components = [

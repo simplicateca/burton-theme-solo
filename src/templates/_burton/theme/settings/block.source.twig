@@ -26,16 +26,22 @@
         ]
     },
 
+    fieldFilter: {
+        label: "Custom Filter Options",
+        help: "Filter options (comma separated)",
+        type: 'text'
+    },
+
     sort: {
         label: "Sort Order",
         help: "How to sort the entries.",
         select: {
             default: { "label": "Default" },
-            title:   { "label": "Alphabetical", "orderBy": "title ASC" },
-            oldest:  { "label": "Oldest to Newest", "orderBy": "postDate ASC" },
-            recent:  { "label": "Newest to Oldest", "orderBy": "postDate DESC" },
-            popular: { "label": "Popularity", "orderBy": "RAND()" },
-            random:  { "label": "Random", "orderBy": "RAND()" }
+            title:   { "label": "Alphabetical", "orderBy": ["title", "asc"] },
+            oldest:  { "label": "Oldest to Newest", "orderBy": ["postDate", "asc"] },
+            recent:  { "label": "Newest to Oldest", "orderBy": ["postDate", "desc"] },
+            popular: { "label": "Popularity", "orderBy": ["RAND()"] },
+            random:  { "label": "Random", "orderBy": ["RAND()"] }
         }
     },
 
@@ -44,11 +50,11 @@
         help: "How to sort the entries.",
         select: {
             default: { "label": "Accept default sort order" },
-            title:   { "label": "Alphabetical", "orderBy": "title ASC" },
-            oldest:  { "label": "Oldest to Newest", "orderBy": "postDate ASC" },
-            recent:  { "label": "Newest to Oldest", "orderBy": "postDate DESC" },
-            popular: { "label": "Popularity", "orderBy": "RAND()" },
-            random:  { "label": "Random", "orderBy": "RAND()" }
+            title:   { "label": "Alphabetical", "orderBy": ["title", "asc"] },
+            oldest:  { "label": "Oldest to Newest", "orderBy": ["postDate", "asc"] },
+            recent:  { "label": "Newest to Oldest", "orderBy": ["postDate", "desc"] },
+            popular: { "label": "Popularity", "orderBy": ["RAND()"] },
+            random:  { "label": "Random", "orderBy": ["RAND()"] }
         }
     },
 } -%}
@@ -142,6 +148,7 @@
                 sort: common.sortOverride,
                 limit: common.limit,
                 topicFilter: common.topicFilter,
+                fieldFilter1: common.fieldFilter
             }
         },
         embed: {

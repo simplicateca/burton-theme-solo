@@ -18,7 +18,7 @@
             html : block('canvas') ~ block('eyecandy'),
             data : { theme: theme },
             class: [
-                "absolute z-[-1]",
+                "absolute",
                 ( eyecandy in ["drips","tilt","wave"] ) ? "bottom-8",
                 ( canvas in ["tight", "zone1", "zone2"] ) ? "-inset-8" : "inset-0",
             ]

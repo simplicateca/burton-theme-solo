@@ -1,6 +1,6 @@
-{## Theme Default Entry ➜ _burton/theme/entry/default.twig -------------------}
+{## Theme Default Entry ➜ _burton/theme/entry/base.twig ----------------------}
 {##--------------------------------------------------------------------------#}
-{%- extends "_burton/base/entry/default" -%}
+{%- extends "_burton/base/entry" -%}
 
 {%- block body__id    "entry-#{entry.id ?? null}" -%}
 {%- block body__class "#{parent()} entry entry--#{entry.type.handle ?? null}" -%}
@@ -31,18 +31,18 @@
     {%- set class  = varargs.class|default('fill-current h-6 w-6') -%}
 
     <div class="flex gap-3">
-        {{- tag( 'a', {
-            href: "https://www.linkedin.com/shareArticle?url=#{encode}",
+        {{- tag('a', {
+            href: "https://www.facebook.com/sharer/sharer.php?u=#{encode}",
             target: '_blank',
-            aira_label: 'Share on LinkedIn',
-            html: svg('@webroot/static/svg/linkedin.svg') | attr({ class: class }),
+            aria_label: 'Share on Facebook',
+            html: svg('@appicons/facebook.svg') | attr({ class: class }),
         }) -}}
 
         {{- tag( 'a', {
             href: "https://twitter.com/intent/tweet?url=#{encode}&text=#{title|url_encode}",
             target: '_blank',
             aira_label: 'Share on Twitter/X',
-            html: svg('@webroot/static/svg/twitter.svg') | attr({ class: class }),
+            html: svg('@appicons/x.svg') | attr({ class: class }),
         }) -}}
 
         {{- tag( 'a', {
@@ -52,15 +52,18 @@
             html: svg('@appicons/envelope.svg') | attr({ class: class }),
         }) -}}
 
-        {{- tag( 'a', {
-            aira_label: 'Copy Link',
-            javascript: "copyToClipboard('#{url}')",
-            html: svg('@appicons/link.svg') | attr({ class: class }),
+        {{- tag('a', {
+            'aria-label': 'Copy Link',
+            'href': '#',
+            'x-data': "{ url: '#{url}' }",
+            'x-on:click.prevent': "navigator.clipboard.writeText(url).then(() => { console.log('Copied:', url) })",
+            'x-tooltip': "'Copy link'",
+            'html': svg('@appicons/link.svg')|attr({ class: class }),
         }) -}}
     </div>
 
     {%- js -%}
-        {% import '_theme/javascript' as javascript %}
+        {%- import '_burton/base/javascript' as javascript -%}
         {{- javascript.copyToClipboard() -}}
     {%- endjs -%}
 {%- endmacro -%}

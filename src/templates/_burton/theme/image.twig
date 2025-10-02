@@ -9,14 +9,8 @@
 {-------------------------------------------------------------------------------------##}
 {%- macro image__cover( images ) -%}
     {%- set params = {
-        transform: {
-            mode: 'crop',
-            width: 742,
-            height: 960,
-            position: 'center-center'
-        },
-        figureclass: 'relative z-20',
-        imgclass: 'max-h-[480px] w-auto mx-auto shadow-xl @lg:max-w-sm',
+        figureclass: "relative z-20",
+        imgclass: "object-cover h-full w-full",
     } | merge( varargs, true) -%}
 
     {{- _self.image( images, ...params ) -}}

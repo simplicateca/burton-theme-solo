@@ -16,7 +16,7 @@
         help: "Handle multiple pages of results?",
         select : {
             basic: "Next / Previous",
-             null: "No Pagination",
+             none: "No Pagination",
         }
     },
 
@@ -114,7 +114,7 @@
 
     knockout: {
         label: "Knockout",
-        help: "Knockout the zone background from the block theme",
+        help: "Change background theme for this zone",
         select: {
             none:  "No Knockout",
             light: "Light Knockout",
@@ -130,7 +130,7 @@
 
     revealAction: {
         label: "Reveal Action",
-        help: "What happens when the user clicks to reveal the content?",
+        help: "How should the content reveal itself?",
         select : {
             modal: "Modal Window",
             toggle: "Foldable Callout",
@@ -285,15 +285,19 @@
                 helpurl   : "https://www.youtube.com/watch?v=x5bVKZxFdPo",
             },
             constants: {
-                layout: ["search", "_burton/theme/search"],
+                layout: ["search", "_burton/local/search"],
             },
             settings: {
                 grid:  common.basicGrid,
                 card:  common.basicCard,
                 click: common.entryClick,
                 pagination: common.pagination,
-                alignment: common.alignment,
-                knockout: common.knockout,
+
+                rssfeed: {
+                    label: "Publish RSS",
+                    help: "Create a feed for this result set?",
+                    lightswitch : { default: 1 }
+                },
 
                 query: {
                     label: "Keyword Search",
@@ -307,9 +311,12 @@
 
                 autosearch: {
                     label: "Automatic Results?",
-                    help: "Show results before requiring any user input or filtering.",
+                    help: "Show results before user input?",
                     lightswitch : { default: 1 }
-                }
+                },
+
+                alignment: common.alignment,
+                knockout: common.knockout,
             }
         },
 

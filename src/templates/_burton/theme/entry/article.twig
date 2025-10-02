@@ -1,6 +1,6 @@
 {## Theme Article Entry ➜ _burton/theme/entry/article.twig -------------------}
 {##--------------------------------------------------------------------------#}
-{%- extends "_burton/theme/entry/default" -%}
+{%- extends "_burton/theme/entry/base" -%}
 
 {%- block body__id    "article-#{entry.id ?? null}" -%}
 {%- block body__class "#{parent()} article article--#{entry.primaryOwner.slug ?? null}" -%}
